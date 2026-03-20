@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ML Mastery — Learn by Doing</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#00e5a0;--g2:#00b37d;--g3:#007a55;
+  --am:#f5a623;--am2:#e8940f;--co:#ff6b47;--pu:#a78bfa;--bl:#60a5fa;
+  --bg:#080c0a;--bg2:#0d1210;--bg3:#121a17;--bg4:#1a2420;--bg5:#222e29;
+  --bd:rgba(0,229,160,0.08);--bd2:rgba(0,229,160,0.18);--bd3:rgba(0,229,160,0.38);
+  --tx:#e8f0ec;--tx2:#7a9990;--tx3:#3d5a50;
+  --mono:'Space Mono',monospace;--syne:'Syne',sans-serif;--sans:'DM Sans',sans-serif;
+  --r:14px;--rs:8px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx)}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,160,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,0.022) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:99px}
+
+/* LAYOUT */
+.shell{display:grid;grid-template-columns:272px 1fr;grid-template-rows:52px 1fr;height:100vh;position:relative;z-index:1}
+
+/* TOPBAR */
+.topbar{grid-column:1/-1;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 1.25rem;gap:10px;z-index:10}
+.tb-logo{font-family:var(--syne);font-size:15px;font-weight:800;background:linear-gradient(135deg,var(--g),var(--bl));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;flex-shrink:0}
+.tb-sep{width:1px;height:18px;background:var(--bd2);flex-shrink:0}
+.tb-crumb{font-family:var(--mono);font-size:10px;color:var(--tx2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-crumb span{color:var(--g)}
+.tb-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.xp-pill{background:rgba(0,229,160,0.1);border:1px solid var(--bd2);border-radius:20px;padding:3px 10px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--g);white-space:nowrap}
+.streak-pill{font-family:var(--mono);font-size:10px;color:var(--am);white-space:nowrap}
+.py-status{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:20px;border:1px solid;white-space:nowrap}
+.py-loading{color:var(--am);border-color:rgba(245,166,35,0.3);background:rgba(245,166,35,0.06)}
+.py-ready{color:var(--g);border-color:rgba(0,229,160,0.3);background:rgba(0,229,160,0.06)}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--bd);overflow-y:auto;padding:0.75rem 0.6rem}
+.ph-sep{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 6px 4px;margin-top:4px;display:flex;align-items:center;gap:6px}
+.ph-sep::after{content:'';flex:1;height:1px;background:var(--bd)}
+.day-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:10px;cursor:pointer;transition:all 0.15s;margin-bottom:1px;border:1px solid transparent}
+.day-item:hover:not(.locked){background:var(--bg3)}
+.day-item.active{background:rgba(0,229,160,0.07);border-color:var(--bd2)}
+.day-item.locked{opacity:0.38;cursor:not-allowed}
+.di-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:700;flex-shrink:0;border:1px solid var(--bd);background:var(--bg3);color:var(--tx3);transition:all 0.2s}
+.di-icon.done{background:rgba(0,229,160,0.12);color:var(--g);border-color:rgba(0,229,160,0.28)}
+.di-icon.cur{background:rgba(245,166,35,0.12);color:var(--am);border-color:rgba(245,166,35,0.28)}
+.di-text{flex:1;min-width:0}
+.di-title{font-size:11px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.di-sub{font-size:10px;color:var(--tx2);margin-top:1px}
+.di-pct{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--tx3);flex-shrink:0}
+.di-pct.lit{color:var(--g)}
+
+/* MAIN */
+.main{overflow:hidden;display:flex;flex-direction:column}
+
+/* LANDING */
+.landing{overflow-y:auto;padding:2rem 2.5rem;max-width:820px}
+.landing-hero{margin-bottom:1.5rem}
+.landing-hero h1{font-family:var(--syne);font-size:26px;font-weight:800;line-height:1.2;margin-bottom:6px}
+.landing-hero h1 .hl{background:linear-gradient(135deg,var(--g),var(--bl));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.landing-hero p{font-size:13px;color:var(--tx2);line-height:1.7;max-width:560px}
+.feat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:1.25rem 0}
+.feat-box{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:1rem;text-align:center}
+.feat-box .fi{font-size:22px;display:block;margin-bottom:6px}
+.feat-box strong{font-size:12px;font-weight:600;display:block}
+.feat-box span{font-size:11px;color:var(--tx2);margin-top:3px;display:block;line-height:1.5}
+.day-card-list{display:flex;flex-direction:column;gap:7px}
+.day-launch-card{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;transition:all 0.18s}
+.day-launch-card:hover:not(.lc-locked){border-color:var(--bd2);transform:translateX(3px)}
+.day-launch-card.lc-locked{opacity:0.38;cursor:not-allowed}
+.lc-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--bg4)}
+.lc-body{flex:1;min-width:0}
+.lc-body strong{font-size:13px;font-weight:500;display:block;color:var(--tx)}
+.lc-body span{font-size:11px;color:var(--tx2);margin-top:2px;display:block}
+.lc-arr{font-size:16px;color:var(--tx3)}
+.lc-bar{width:60px;height:4px;background:var(--bg4);border-radius:99px;overflow:hidden;flex-shrink:0}
+.lc-bar-fill{height:100%;border-radius:99px;background:var(--g);transition:width 0.4s}
+
+/* LESSON VIEW */
+.lesson-view{display:grid;grid-template-columns:1fr 440px;height:calc(100vh - 52px);overflow:hidden}
+.l-left{overflow-y:auto;padding:1.5rem 1.75rem;border-right:1px solid var(--bd)}
+.l-right{overflow-y:auto;padding:1.1rem 1.2rem}
+
+/* Lesson header */
+.lh-day{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-bottom:5px;letter-spacing:0.5px}
+.lh-title{font-family:var(--syne);font-size:19px;font-weight:800;line-height:1.2;margin-bottom:8px}
+.lh-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:1.25rem}
+.ltag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;border:1px solid}
+.lt-t{background:rgba(167,139,250,0.1);color:#c4b5fd;border-color:rgba(167,139,250,0.25)}
+.lt-c{background:rgba(0,229,160,0.08);color:var(--g);border-color:rgba(0,229,160,0.2)}
+.lt-p{background:rgba(245,166,35,0.08);color:var(--am);border-color:rgba(245,166,35,0.2)}
+.lt-pr{background:rgba(255,107,71,0.08);color:#ff9980;border-color:rgba(255,107,71,0.2)}
+
+/* Progress bar */
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:1.4rem}
+.prog-bar{flex:1;background:var(--bg4);border-radius:99px;height:5px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--g2),var(--g));border-radius:99px;transition:width 0.5s cubic-bezier(.34,1.56,.64,1)}
+.prog-txt{font-family:var(--mono);font-size:10px;color:var(--tx2);white-space:nowrap;flex-shrink:0}
+
+/* Concept blocks */
+.cb{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:1.15rem;margin-bottom:1rem}
+.cb-h{font-family:var(--syne);font-size:13px;font-weight:700;color:var(--g);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.cb-h::before{content:'';width:3px;height:14px;background:var(--g);border-radius:99px;flex-shrink:0}
+.cb-t{font-size:13px;color:var(--tx2);line-height:1.8}
+.cb-t strong{color:var(--tx);font-weight:500}
+.cb-t br+br{display:block;margin:4px 0}
+.math{background:#08100d;border:1px solid var(--bd2);border-radius:8px;padding:10px 14px;margin:10px 0;font-family:var(--mono);font-size:13px;color:#7fffd4;text-align:center;letter-spacing:0.5px}
+.ibox{background:linear-gradient(135deg,rgba(96,165,250,0.05),rgba(167,139,250,0.03));border:1px solid rgba(96,165,250,0.18);border-radius:var(--r);padding:1rem;margin-bottom:1rem}
+.ibox-lbl{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--bl);text-transform:uppercase;margin-bottom:6px}
+.ibox-t{font-size:13px;color:var(--tx2);line-height:1.7}
+.ibox-t strong{color:var(--tx)}
+.wbox{background:rgba(245,166,35,0.05);border:1px solid rgba(245,166,35,0.2);border-left:3px solid var(--am);border-radius:0 var(--rs) var(--rs) 0;padding:0.85rem 1rem;margin-bottom:1rem;font-size:12px;color:#fcd34d;line-height:1.7}
+.wbox::before{content:'⚠ ';font-weight:700}
+.csnip{background:#08100d;border:1px solid var(--bd2);border-radius:var(--r);padding:1rem;margin-bottom:1rem;overflow-x:auto}
+.csnip pre{font-family:var(--mono);font-size:11px;line-height:1.9;color:#a8d8b9}
+.kw{color:#ff9980}.fn{color:var(--g)}.cm{color:var(--tx3)}.st{color:#fcd34d}.nm{color:var(--bl)}
+.ic{font-family:var(--mono);font-size:11px;background:var(--bg4);color:var(--g);padding:2px 5px;border-radius:4px}
+
+/* Task tabs */
+.task-tabs{display:flex;gap:4px;margin-bottom:1rem;flex-wrap:wrap}
+.ttab{padding:5px 12px;border-radius:var(--rs);font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--bd);background:var(--bg3);color:var(--tx2);transition:all 0.15s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.ttab:hover{border-color:var(--bd2)}
+.ttab.act{background:rgba(0,229,160,0.08);border-color:var(--bd2);color:var(--tx)}
+.ttab.done{background:rgba(0,229,160,0.07);border-color:rgba(0,229,160,0.2);color:var(--g)}
+.ttab .ck{width:13px;height:13px;border-radius:4px;background:var(--g);display:none;align-items:center;justify-content:center;flex-shrink:0}
+.ttab.done .ck{display:flex}
+.ttab .ck::after{content:'';width:3px;height:5px;border-right:1.5px solid #000;border-bottom:1.5px solid #000;transform:rotate(45deg) translate(-0.5px,-0.5px);display:block}
+
+/* Q panel */
+.qpanel{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:1rem;overflow:hidden}
+.qp-head{padding:1rem 1rem 0.75rem}
+.qp-num{font-family:var(--mono);font-size:9px;color:var(--tx3);letter-spacing:1px;margin-bottom:5px;text-transform:uppercase}
+.qp-q{font-size:13px;font-weight:500;line-height:1.6;color:var(--tx);white-space:pre-line}
+.qp-diff{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:7px}
+.diff-e{background:rgba(0,229,160,0.1);color:var(--g)}
+.diff-m{background:rgba(245,166,35,0.1);color:var(--am)}
+.diff-h{background:rgba(255,107,71,0.1);color:var(--co)}
+
+/* MCQ */
+.mcq-list{padding:0.75rem 1rem;display:flex;flex-direction:column;gap:6px}
+.mcq-opt{display:flex;align-items:flex-start;gap:10px;padding:9px 11px;border-radius:9px;border:1px solid var(--bd2);cursor:pointer;transition:all 0.15s;font-size:12px;line-height:1.5;color:var(--tx)}
+.mcq-opt:hover{background:var(--bg4);border-color:var(--bd3)}
+.mcq-opt.sel{border-color:var(--bl);background:rgba(96,165,250,0.06)}
+.mcq-opt.ok{border-color:var(--g);background:rgba(0,229,160,0.07);color:var(--g);animation:optOk 0.3s ease}
+.mcq-opt.ng{border-color:var(--co);background:rgba(255,107,71,0.07);color:#ff9980}
+@keyframes optOk{0%{transform:scale(0.98)}100%{transform:scale(1)}}
+.opt-l{font-family:var(--mono);font-size:10px;font-weight:700;width:20px;height:20px;border-radius:5px;background:var(--bg4);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+
+/* Feedback */
+.fb{margin:0 1rem 0.75rem;border-radius:9px;padding:9px 12px;font-size:12px;line-height:1.6;display:none;animation:fadeIn 0.25s ease}
+.fb.show{display:block}
+.fb-ok{background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.18);color:var(--g)}
+.fb-ng{background:rgba(255,107,71,0.06);border:1px solid rgba(255,107,71,0.18);color:#ff9980}
+.fb-h{font-weight:600;font-size:11px;font-family:var(--mono);margin-bottom:3px;display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Code editor */
+.editor-wrap{border:1px solid var(--bd2);border-radius:var(--r);overflow:hidden;margin-bottom:0.75rem;transition:border-color 0.2s}
+.editor-wrap.pass-flash{border-color:var(--g);box-shadow:0 0 0 2px rgba(0,229,160,0.18)}
+.editor-wrap.fail-flash{border-color:var(--co);animation:shake 0.3s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+.ed-bar{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg4);border-bottom:1px solid var(--bd)}
+.ed-lang{font-family:var(--mono);font-size:9px;color:var(--tx2)}
+.ed-btns{display:flex;gap:6px}
+.ed-btn{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--tx2);transition:all 0.15s}
+.ed-btn:hover{background:var(--bg3);color:var(--tx)}
+.run-btn{background:linear-gradient(135deg,var(--g2),var(--g));color:#000;border:none;font-weight:700;padding:4px 14px;border-radius:6px;cursor:pointer;font-family:var(--syne);font-size:10px;transition:all 0.2s;display:flex;align-items:center;gap:5px}
+.run-btn:hover{box-shadow:0 0 14px rgba(0,229,160,0.35)}
+.run-btn:disabled{opacity:0.5;cursor:not-allowed}
+.run-btn .spin{display:none;width:10px;height:10px;border:2px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin 0.6s linear infinite}
+.run-btn.loading .spin{display:block}
+.run-btn.loading .run-txt{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.CodeMirror{height:auto;min-height:120px;max-height:300px;font-family:var(--mono)!important;font-size:12px!important;line-height:1.7!important;background:#0d1410!important}
+.CodeMirror-scroll{max-height:300px}
+.out-panel{background:#060a08;border-top:1px solid var(--bd);padding:8px 12px;font-family:var(--mono);font-size:11px;min-height:40px;max-height:140px;overflow-y:auto;display:none;white-space:pre-wrap;line-height:1.7}
+.out-panel.show{display:block}
+.out-pass{color:var(--g)}.out-fail{color:#ff9980}.out-stdout{color:var(--tx2)}.out-err{color:var(--co)}
+
+/* Hints */
+.hints-wrap{padding:0 1rem 0.75rem}
+.hint-btn{width:100%;background:rgba(245,166,35,0.05);border:1px dashed rgba(245,166,35,0.25);border-radius:8px;padding:7px 11px;font-size:11px;color:var(--am);cursor:pointer;font-family:var(--sans);text-align:left;display:flex;align-items:center;gap:7px;margin-bottom:4px;transition:all 0.2s}
+.hint-btn:hover{background:rgba(245,166,35,0.1);border-color:rgba(245,166,35,0.4)}
+.hint-box{background:rgba(245,166,35,0.04);border:1px solid rgba(245,166,35,0.14);border-radius:8px;padding:9px 11px;font-size:12px;color:#fcd34d;line-height:1.7;margin-bottom:4px;display:none;animation:fadeIn 0.25s ease}
+.hint-box.show{display:block}
+.sol-btn{width:100%;background:rgba(255,107,71,0.05);border:1px dashed rgba(255,107,71,0.2);border-radius:8px;padding:7px 11px;font-size:11px;color:var(--co);cursor:pointer;font-family:var(--sans);text-align:left;display:flex;align-items:center;gap:7px;transition:all 0.2s;margin-top:2px}
+.sol-btn:hover{background:rgba(255,107,71,0.09)}
+.sol-area{display:none;background:#08100d;border:1px solid rgba(255,107,71,0.18);border-radius:8px;margin-top:5px;overflow:hidden}
+.sol-area.show{display:block}
+.sol-area pre{font-family:var(--mono);font-size:11px;line-height:1.8;color:#a8d8b9;padding:1rem;overflow-x:auto;white-space:pre}
+
+/* Q actions */
+.qactions{padding:0 1rem 1rem;display:flex;gap:7px}
+.qa-btn{padding:8px 16px;border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--syne);transition:all 0.2s;flex:1}
+.qa-btn:active{transform:scale(0.97)}
+.qa-submit{background:linear-gradient(135deg,var(--g2),var(--g));color:#000}
+.qa-submit:hover{box-shadow:0 0 16px rgba(0,229,160,0.35)}
+
+/* Complete screen */
+.done-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2.5rem 2rem;min-height:400px}
+.ds-icon{font-size:52px;margin-bottom:1rem;display:block;animation:bounceIn 0.6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes bounceIn{0%{transform:scale(0)}100%{transform:scale(1)}}
+.ds-title{font-family:var(--syne);font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--g),var(--bl));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.ds-sub{font-size:13px;color:var(--tx2);margin-bottom:1.25rem;line-height:1.6;max-width:320px}
+.ds-xp{font-family:var(--mono);font-size:32px;font-weight:700;color:var(--g);display:block;margin-bottom:1.5rem;text-shadow:0 0 20px rgba(0,229,160,0.35)}
+.ds-btn{background:linear-gradient(135deg,var(--g2),var(--g));color:#000;border:none;border-radius:var(--rs);padding:10px 28px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--syne);transition:all 0.2s;margin:3px}
+.ds-btn:hover{box-shadow:0 0 22px rgba(0,229,160,0.4);transform:scale(1.03)}
+.ds-btn-g{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2)}
+
+/* Toast */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--bg3);border:1px solid var(--bd3);border-radius:var(--r);padding:10px 16px;z-index:9999;transform:translateY(70px);opacity:0;transition:all 0.35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;min-width:130px}
+.toast.show{transform:translateY(0);opacity:1}
+.t-xp{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--g);display:block;line-height:1}
+.t-lbl{font-size:10px;color:var(--tx2);margin-top:2px;display:block}
+
+/* Pyodide loader overlay */
+.py-overlay{position:fixed;inset:0;background:rgba(8,12,10,0.92);z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(4px)}
+.py-overlay.hidden{display:none}
+.py-spinner{width:36px;height:36px;border:3px solid var(--bd2);border-top-color:var(--g);border-radius:50%;animation:spin 0.7s linear infinite}
+.py-ov-title{font-family:var(--syne);font-size:16px;font-weight:800;color:var(--tx)}
+.py-ov-sub{font-family:var(--mono);font-size:11px;color:var(--tx2)}
+.py-steps{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.py-step{font-family:var(--mono);font-size:10px;color:var(--tx3);display:flex;align-items:center;gap:8px}
+.py-step.done{color:var(--g)}.py-step.cur{color:var(--am)}
+.py-step-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* Modal */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9997;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s;backdrop-filter:blur(5px)}
+.modal-ov.show{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--bd3);border-radius:20px;padding:2rem;text-align:center;max-width:340px;width:90%;transform:scale(0.85);transition:transform 0.35s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden}
+.modal::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(0,229,160,0.07),transparent 55%);pointer-events:none}
+.modal-ov.show .modal{transform:scale(1)}
+.m-icon{font-size:48px;margin-bottom:0.9rem;display:block}
+.modal h2{font-family:var(--syne);font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--g),var(--bl));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:5px}
+.modal p{font-size:12px;color:var(--tx2);margin-bottom:1rem;line-height:1.6}
+.m-xp{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--g);display:block;margin-bottom:1.25rem}
+.m-btn{background:linear-gradient(135deg,var(--g2),var(--g));color:#000;border:none;border-radius:var(--rs);padding:9px 28px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--syne);transition:all 0.2s}
+.m-btn:hover{box-shadow:0 0 22px rgba(0,229,160,0.4);transform:scale(1.04)}
+
+/* Canvas confetti */
+#cfc{position:fixed;inset:0;pointer-events:none;z-index:9996}
+</style>
+</head>
+<body>
+<canvas id="cfc"></canvas>
+
+<!-- Pyodide loading overlay -->
+<div class="py-overlay" id="pyOverlay">
+  <div class="py-spinner"></div>
+  <div class="py-ov-title">Initializing Python Runtime</div>
+  <div class="py-ov-sub">Loading Pyodide WebAssembly engine...</div>
+  <div class="py-steps">
+    <div class="py-step cur" id="ps1"><div class="py-step-dot"></div>Loading Pyodide core</div>
+    <div class="py-step" id="ps2"><div class="py-step-dot"></div>Installing NumPy</div>
+    <div class="py-step" id="ps3"><div class="py-step-dot"></div>Installing scikit-learn</div>
+    <div class="py-step" id="ps4"><div class="py-step-dot"></div>Ready to run Python</div>
+  </div>
+</div>
+
+<!-- Achievement modal -->
+<div class="modal-ov" id="modal">
+  <div class="modal">
+    <span class="m-icon" id="m-icon">🏆</span>
+    <h2 id="m-title">Day Complete!</h2>
+    <p id="m-msg">Keep the momentum going!</p>
+    <span class="m-xp" id="m-xp">+100 XP</span>
+    <button class="m-btn" onclick="closeModal()">Continue →</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="t-xp" id="t-xp">+25 XP</span>
+  <span class="t-lbl" id="t-lbl">correct!</span>
+</div>
+
+<div class="shell">
+  <header class="topbar">
+    <div class="tb-logo">ML_MASTERY</div>
+    <div class="tb-sep"></div>
+    <div class="tb-crumb" id="crumb">← pick a day to start</div>
+    <div class="tb-right">
+      <span class="py-status py-loading" id="pyStatus">⏳ Python loading</span>
+      <span class="xp-pill" id="xpPill">0 XP · LVL 1</span>
+      <span class="streak-pill" id="streakPill">🔥 0</span>
+    </div>
+  </header>
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+<script>
+// ════════════════════════════════════════════════════════════
+//  CURRICULUM DATA
+// ════════════════════════════════════════════════════════════
+const C = [
+ {phase:"Phase 1 — Regression",col:"#00e5a0",days:[
+  {day:1,title:"Linear Regression — Intuition & Cost",topic:"Supervised Learning",xp:175,
+   concept:`<div class="cb"><div class="cb-h">What is Linear Regression?</div><div class="cb-t">Linear Regression finds the <strong>best-fit line</strong> through data. Given input x, we predict:<br><br></div><div class="math">ŷ = w·x + b</div><div class="cb-t"><strong>w</strong> = weight (slope), <strong>b</strong> = bias (intercept). Goal: find w and b so ŷ ≈ y.</div></div><div class="ibox"><div class="ibox-lbl">💡 Real-world intuition</div><div class="ibox-t">Predicting house price from size. Bigger house → higher price. The <strong>weight</strong> says "for every extra sq ft, price goes up by $X". The <strong>bias</strong> is the base price even at 0 sq ft.</div></div><div class="cb"><div class="cb-h">The Cost Function J(w,b)</div><div class="cb-t">How do we measure how wrong our line is? Use <strong>Mean Squared Error (MSE)</strong>:</div><div class="math">J(w,b) = (1/2m) · Σ(ŷᵢ − yᵢ)²</div><div class="cb-t">m = number of examples. The <strong>½</strong> is a convenience that cancels when we differentiate. <strong>We want to minimize J.</strong> When J=0, every prediction is perfect.</div></div><div class="wbox">Squaring errors matters: without it, positive and negative errors cancel out and you'd think a terrible model is perfect.</div>`,
+   tasks:[
+    {id:"1_1",title:"Q1: Compute a prediction",type:"mcq",diff:"easy",xp:20,
+     q:"Given w=3, b=2, and x=4, what is the prediction ŷ?",
+     opts:["10","12","14","16"],ans:2,
+     exp:"ŷ = w·x + b = 3·4 + 2 = 12 + 2 = 14. Always substitute directly: weight × input + bias.",
+     hint:"Use ŷ = w·x + b. Substitute w=3, x=4, b=2 directly."},
+    {id:"1_2",title:"Q2: Perfect predictions",type:"mcq",diff:"easy",xp:20,
+     q:"If our model predicts ŷ = [2, 4, 6] and true values are y = [2, 4, 6], what is J(w,b)?",
+     opts:["3","1","0","Cannot be determined"],ans:2,
+     exp:"When every prediction exactly equals the label, each error (ŷᵢ−yᵢ)=0. So J=(1/2m)·Σ0²=0. Perfect model → J=0.",
+     hint:"What is (ŷᵢ−yᵢ)² when ŷᵢ = yᵢ exactly?"},
+    {id:"1_3",title:"Q3: Why square errors?",type:"mcq",diff:"medium",xp:25,
+     q:"Why do we SQUARE the errors in MSE instead of just summing them?",
+     opts:["Squaring makes the math harder, which is more impressive","Positive and negative errors would cancel out giving misleadingly low cost","Squaring is faster to compute","Squared errors are always smaller"],ans:1,
+     exp:"If predictions are [+2, -2] from targets, the sum of errors = 0 — suggesting a perfect model. Squaring prevents this: (+2)²+(−2)²=8, correctly showing the model is wrong.",
+     hint:"What happens if one prediction is +5 above target and another is -5 below target? What's their sum?"},
+    {id:"1_4",title:"Q4: Implement predict()",type:"code",diff:"medium",xp:50,
+     q:"Implement predict(X, w, b) that returns predictions ŷ = w*X + b.\nMust work for both a single number AND a NumPy array.",
+     starter:`import numpy as np
+
+def predict(X, w, b):
+    # YOUR CODE HERE
+    # Return: w * X + b
+    pass
+
+# Quick self-test (don't delete):
+print(predict(3, 2, 1))           # Expected: 7
+print(predict(np.array([1,2,3]), 2.0, 1.0))  # Expected: [3. 5. 7.]`,
+     test:`import numpy as np
+assert predict(3, 2, 1) == 7, f"predict(3,2,1) should be 7, got {predict(3,2,1)}"
+arr = predict(np.array([1,2,3,4,5]), 2.0, 1.0)
+assert np.allclose(arr, [3,5,7,9,11]), f"Array test failed: got {arr}"
+assert predict(0, 5, 3) == 3, "predict(0,5,3) should equal b=3"
+result = "PASS"`,
+     hints:["NumPy does element-wise multiplication automatically. w * X works for both scalars and arrays.","The formula is literally one line: return w * X + b","No loops needed! NumPy handles the whole array at once with a single expression."],
+     sol:`import numpy as np
+
+def predict(X, w, b):
+    return w * X + b`},
+    {id:"1_5",title:"Q5: Implement compute_cost()",type:"code",diff:"medium",xp:60,
+     q:"Implement compute_cost(X, y, w, b) using MSE:\n\nJ(w,b) = (1/(2*m)) · Σ(w*X + b − y)²",
+     starter:`import numpy as np
+
+def compute_cost(X, y, w, b):
+    m = len(X)
+    # Step 1: get predictions (w*X + b)
+    # Step 2: compute errors (predictions - y)
+    # Step 3: return (1/(2*m)) * sum(errors^2)
+    pass
+
+X = np.array([1., 2., 3., 4.])
+y = np.array([2., 4., 6., 8.])
+print(compute_cost(X, y, 2.0, 0.0))  # Perfect fit → 0.0
+print(compute_cost(X, y, 0.0, 0.0))  # Bad fit → positive`,
+     test:`import numpy as np
+X = np.array([1.,2.,3.,4.]); y = np.array([2.,4.,6.,8.])
+perfect = compute_cost(X, y, 2.0, 0.0)
+assert abs(perfect) < 1e-9, f"Perfect fit cost should be 0, got {perfect}"
+bad = compute_cost(X, y, 0.0, 0.0)
+assert bad > 0, "Zero weights should give positive cost"
+medium = compute_cost(X, y, 1.0, 0.0)
+assert 0 < medium < bad, "w=1 cost should be between 0 and w=0 cost"
+result = "PASS"`,
+     hints:["Step 1: predictions = w * X + b","Step 2: errors = predictions - y","Step 3: return (1/(2*m)) * np.sum(errors**2)"],
+     sol:`import numpy as np
+
+def compute_cost(X, y, w, b):
+    m = len(X)
+    predictions = w * X + b
+    errors = predictions - y
+    return (1/(2*m)) * np.sum(errors**2)`}
+   ]},
+
+  {day:2,title:"Gradient Descent",topic:"Optimization",xp:200,
+   concept:`<div class="cb"><div class="cb-h">Why Gradient Descent?</div><div class="cb-t">We want to minimize J(w,b). Imagine standing on a hilly terrain blindfolded — you find the valley by always stepping <strong>downhill</strong>. The gradient tells us the slope; we step opposite to it.</div></div><div class="cb"><div class="cb-h">The Update Rules</div><div class="math">w := w − α · (∂J/∂w)</div><div class="math">b := b − α · (∂J/∂b)</div><div class="cb-t">Where <strong>α</strong> (alpha) is the learning rate — step size. The partial derivatives are:</div><div class="math">∂J/∂w = (1/m)·Σ(ŷᵢ−yᵢ)·xᵢ&nbsp;&nbsp;&nbsp;&nbsp;∂J/∂b = (1/m)·Σ(ŷᵢ−yᵢ)</div></div><div class="ibox"><div class="ibox-lbl">⚡ Learning rate intuition</div><div class="ibox-t"><strong>Too small α</strong> → tiny steps, takes forever to converge.<br><strong>Too large α</strong> → overshoots the valley, cost oscillates or explodes.<br>Typical starting value: 0.01. Always update w and b <strong>simultaneously</strong> — compute both gradients with OLD w,b before updating either.</div></div><div class="wbox">Never update w first and then use the NEW w to compute b's gradient. This changes the math and causes bugs.</div>`,
+   tasks:[
+    {id:"2_1",title:"Q1: Apply the update rule",type:"mcq",diff:"easy",xp:25,
+     q:"Current w=5.0. Gradient ∂J/∂w=2.0, learning rate α=0.1.\nWhat is the new w after one update step?",
+     opts:["5.2","4.8","5.0","4.0"],ans:1,
+     exp:"w = w − α·(∂J/∂w) = 5.0 − 0.1·2.0 = 5.0 − 0.2 = 4.8. We SUBTRACT gradient×α. Positive gradient means we're on an upward slope → move left (decrease w).",
+     hint:"Apply: w_new = w - alpha * gradient = 5.0 - 0.1 * 2.0"},
+    {id:"2_2",title:"Q2: Learning rate too large",type:"mcq",diff:"medium",xp:25,
+     q:"If the learning rate α is TOO LARGE, what typically happens?",
+     opts:["Converges faster to the minimum","Cost decreases very slowly","Cost oscillates or increases (diverges)","Gradient becomes zero immediately"],ans:2,
+     exp:"A too-large α means we overshoot the minimum each step — we jump to the other side of the valley. Cost bounces up and down and can diverge to infinity. This is one of the most common bugs in ML code.",
+     hint:"Imagine walking downhill but taking giant leaps — what happens when you reach the bottom?"},
+    {id:"2_3",title:"Q3: Implement compute_gradients()",type:"code",diff:"medium",xp:55,
+     q:"Implement compute_gradients(X, y, w, b) returning (dw, db):\n\ndw = (1/m)·Σ(ŷᵢ−yᵢ)·xᵢ\ndb = (1/m)·Σ(ŷᵢ−yᵢ)",
+     starter:`import numpy as np
+
+def compute_gradients(X, y, w, b):
+    m = len(X)
+    # Step 1: predictions = w*X + b
+    # Step 2: errors = predictions - y
+    # Step 3: dw = (1/m) * np.dot(errors, X)
+    # Step 4: db = (1/m) * np.sum(errors)
+    pass
+
+X = np.array([1., 2., 3.])
+y = np.array([2., 4., 6.])
+
+# Perfect params: gradients should be ~0
+dw, db = compute_gradients(X, y, 2.0, 0.0)
+print(f"Perfect fit → dw={dw:.4f}, db={db:.4f}")
+
+# Zero params: gradients should be negative (need bigger w,b)
+dw2, db2 = compute_gradients(X, y, 0.0, 0.0)
+print(f"Zero params → dw={dw2:.4f}, db={db2:.4f}")`,
+     test:`import numpy as np
+X = np.array([1.,2.,3.]); y = np.array([1.,2.,3.])
+dw, db = compute_gradients(X, y, 1.0, 0.0)
+assert abs(dw) < 1e-9 and abs(db) < 1e-9, f"Perfect params should give ~0 gradients, got dw={dw:.6f} db={db:.6f}"
+dw2, db2 = compute_gradients(X, y, 0.0, 0.0)
+assert dw2 < 0 and db2 < 0, "With zero weights, gradients should be negative"
+result = "PASS"`,
+     hints:["predictions = w * X + b, then errors = predictions - y","np.dot(errors, X) computes Σ(errors[i]*X[i]) — the dot product handles the sum","dw = (1/m)*np.dot(errors, X)  and  db = (1/m)*np.sum(errors)"],
+     sol:`import numpy as np
+
+def compute_gradients(X, y, w, b):
+    m = len(X)
+    predictions = w * X + b
+    errors = predictions - y
+    dw = (1/m) * np.dot(errors, X)
+    db = (1/m) * np.sum(errors)
+    return dw, db`},
+    {id:"2_4",title:"Q4: Full gradient descent loop",type:"code",diff:"hard",xp:95,
+     q:"Implement gradient_descent(X, y, w, b, alpha, n_iters).\nReturn (w_final, b_final, costs_list).\nStore cost every 100 iterations.",
+     starter:`import numpy as np
+
+def gradient_descent(X, y, w, b, alpha, n_iters):
+    m = len(X)
+    costs = []
+    for i in range(n_iters):
+        # 1. predictions
+        # 2. errors
+        # 3. dw, db
+        # 4. update w and b SIMULTANEOUSLY
+        # 5. every 100 steps: append cost to costs
+        pass
+    return w, b, costs
+
+# Test on y = 3x + 2 data
+np.random.seed(42)
+X = np.linspace(0, 5, 40)
+y = 3*X + 2 + np.random.randn(40)*0.3
+
+w_f, b_f, costs = gradient_descent(X, y, 0.0, 0.0, alpha=0.01, n_iters=3000)
+print(f"w={w_f:.3f} (target≈3.0), b={b_f:.3f} (target≈2.0)")
+print(f"Cost went from {costs[0]:.2f} → {costs[-1]:.4f}")`,
+     test:`import numpy as np
+np.random.seed(42)
+X = np.linspace(0,5,40); y = 3*X + 2 + np.random.randn(40)*0.3
+w_f, b_f, costs = gradient_descent(X, y, 0.0, 0.0, alpha=0.01, n_iters=3000)
+assert abs(w_f - 3.0) < 0.3, f"w should be ~3.0, got {w_f:.3f}"
+assert abs(b_f - 2.0) < 0.6, f"b should be ~2.0, got {b_f:.3f}"
+assert len(costs) > 0, "costs list must not be empty"
+assert costs[-1] < costs[0], "Cost must decrease over training"
+result = "PASS"`,
+     hints:["Inside loop: predictions = w*X+b, errors = predictions-y","Gradients: dw=(1/m)*np.dot(errors,X), db=(1/m)*np.sum(errors)","Update simultaneously: w = w - alpha*dw  then  b = b - alpha*db  (not before computing both grads)"],
+     sol:`import numpy as np
+
+def gradient_descent(X, y, w, b, alpha, n_iters):
+    m = len(X)
+    costs = []
+    for i in range(n_iters):
+        predictions = w * X + b
+        errors = predictions - y
+        dw = (1/m) * np.dot(errors, X)
+        db = (1/m) * np.sum(errors)
+        w = w - alpha * dw
+        b = b - alpha * db
+        if i % 100 == 0:
+            cost = (1/(2*m)) * np.sum(errors**2)
+            costs.append(cost)
+    return w, b, costs`}
+   ]},
+
+  {day:3,title:"Vectorization & Feature Scaling",topic:"NumPy Mastery",xp:155,
+   concept:`<div class="cb"><div class="cb-h">Why Vectorization?</div><div class="cb-t">Python loops are <strong>100–1000x slower</strong> than NumPy operations. NumPy runs in C under the hood. For 1M rows: loop = 10 seconds, vectorized = 0.01 seconds.<br><br>With multiple features, X becomes a matrix (m×n) and predictions become:</div><div class="math">ŷ = X @ w + b</div><div class="cb-t">Where @ is matrix multiplication and w is now a vector of weights.</div></div><div class="cb"><div class="cb-h">Z-score Feature Normalization</div><div class="cb-t">If feature 1 ranges 0–1000 and feature 2 ranges 0–0.001, gradient descent is imbalanced. Normalize each feature:</div><div class="math">x_norm = (x − μ) / σ</div><div class="cb-t">μ = mean, σ = standard deviation. After normalization: <strong>mean≈0, std≈1</strong> for every feature.</div></div><div class="ibox"><div class="ibox-lbl">🔑 Critical rule</div><div class="ibox-t">Compute μ and σ <strong>ONLY on training data</strong>. Then apply the same μ,σ to normalize test data. Never fit the normalizer on test data — that's data leakage.</div></div>`,
+   tasks:[
+    {id:"3_1",title:"Q1: Matrix multiply shapes",type:"mcq",diff:"medium",xp:25,
+     q:"X has shape (100, 3): 100 examples, 3 features.\nw has shape (3,): one weight per feature.\nWhat is the shape of X @ w?",
+     opts:["(3, 100)","(100, 3)","(100,)","(3,)"],ans:2,
+     exp:"Matrix multiply: (100×3) @ (3,) → (100,). The 3s cancel. Each of the 100 rows gets dot-producted with w (length 3), giving one prediction per sample → shape (100,).",
+     hint:"In matrix multiply (m×n) @ (n,), the n dimensions cancel and you get shape (m,)."},
+    {id:"3_2",title:"Q2: Normalization result",type:"mcq",diff:"easy",xp:20,
+     q:"After z-score normalization, what are the mean and standard deviation of each feature?",
+     opts:["mean=1, std=0","mean=0, std=1","mean=0.5, std=0.5","Depends on the data"],ans:1,
+     exp:"Z-score: x_norm=(x-μ)/σ. Subtracting μ shifts the mean to 0. Dividing by σ scales so std=1. This is also called 'standardization'.",
+     hint:"After (x - mean) / std: what value do you get when x equals the mean exactly?"},
+    {id:"3_3",title:"Q3: Implement normalize()",type:"code",diff:"medium",xp:55,
+     q:"Implement normalize(X) for a 2D NumPy array (m×n).\nNormalize each COLUMN independently.\nReturn: (X_norm, mu, sigma)  ← you need mu/sigma to normalize test data later!",
+     starter:`import numpy as np
+
+def normalize(X):
+    # mu: mean of each column → shape (n,)
+    # sigma: std of each column → shape (n,)
+    # X_norm = (X - mu) / sigma
+    pass
+
+X = np.array([[1., 100.],
+              [2., 200.],
+              [3., 300.],
+              [4., 400.]])
+X_norm, mu, sigma = normalize(X)
+print("Normalized:\\n", X_norm.round(3))
+print("Mean:", mu)      # [2.5, 250.]
+print("Std:", sigma.round(2))`,
+     test:`import numpy as np
+np.random.seed(0)
+X = np.random.randn(100, 3) * np.array([10., 100., 0.1])
+X_norm, mu, sigma = normalize(X)
+assert X_norm.shape == X.shape, f"Shape must be preserved: {X_norm.shape}"
+assert np.allclose(X_norm.mean(axis=0), 0, atol=1e-9), f"Mean should be 0, got {X_norm.mean(axis=0)}"
+assert np.allclose(X_norm.std(axis=0), 1, atol=1e-9), f"Std should be 1, got {X_norm.std(axis=0)}"
+result = "PASS"`,
+     hints:["Use np.mean(X, axis=0) to get the mean of each column (axis=0 means 'along rows')","Use np.std(X, axis=0) for standard deviation per column","Broadcasting: (X - mu) / sigma works directly — NumPy handles each column automatically"],
+     sol:`import numpy as np
+
+def normalize(X):
+    mu = np.mean(X, axis=0)
+    sigma = np.std(X, axis=0)
+    X_norm = (X - mu) / sigma
+    return X_norm, mu, sigma`},
+    {id:"3_4",title:"Q4: Multi-feature predict",type:"code",diff:"medium",xp:55,
+     q:"Implement predict_multi(X, w, b) for matrix X (m×n).\nUse matrix multiplication: X @ w + b",
+     starter:`import numpy as np
+
+def predict_multi(X, w, b):
+    # Use @ for matrix multiplication
+    pass
+
+X = np.array([[1., 2.],
+              [3., 4.],
+              [5., 6.]])
+w = np.array([1.0, 2.0])
+b = 0.5
+preds = predict_multi(X, w, b)
+print(preds)  # Expected: [5.5, 11.5, 17.5]`,
+     test:`import numpy as np
+X = np.array([[1.,2.],[3.,4.],[5.,6.]])
+w = np.array([1.,2.]); b = 0.5
+preds = predict_multi(X, w, b)
+expected = np.array([5.5, 11.5, 17.5])
+assert np.allclose(preds, expected), f"Expected {expected}, got {preds}"
+result = "PASS"`,
+     hints:["The formula is: return X @ w + b","@ is Python's matrix multiply operator (same as np.dot for 2D arrays)","X has shape (m,n), w has shape (n,), result has shape (m,)"],
+     sol:`import numpy as np
+
+def predict_multi(X, w, b):
+    return X @ w + b`}
+   ]},
+
+  {day:4,title:"Logistic Regression — Sigmoid & Loss",topic:"Classification",xp:175,
+   concept:`<div class="cb"><div class="cb-h">The Problem with Linear for Classification</div><div class="cb-t">Linear regression outputs any real number — but we need <strong>probabilities (0 to 1)</strong> for classification. A line can give you -5 or 100, which are meaningless as probabilities.<br><br>Solution: wrap the linear output in the <strong>sigmoid function</strong>:</div><div class="math">σ(z) = 1 / (1 + e⁻ᶻ)</div><div class="cb-t">Squishes any real number z into (0,1). Interpret output as <strong>probability of class 1</strong>.</div></div><div class="cb"><div class="cb-h">Binary Cross-Entropy Loss</div><div class="cb-t">MSE works poorly for classification (non-convex). Use <strong>log loss</strong>:</div><div class="math">L = −(1/m)·Σ[ yᵢ·log(ŷᵢ) + (1−yᵢ)·log(1−ŷᵢ) ]</div><div class="cb-t">When y=1: loss = −log(ŷ). Predict ŷ≈1 → loss≈0 ✓. Predict ŷ≈0 → loss→∞ ✗.<br>When y=0: loss = −log(1−ŷ). Same logic reversed.</div></div><div class="ibox"><div class="ibox-lbl">🎯 Decision boundary</div><div class="ibox-t">Predict class 1 if ŷ ≥ 0.5, else class 0. Since σ(0)=0.5, boundary is where <strong>w·x+b=0</strong>. This is a line/plane in feature space.</div></div>`,
+   tasks:[
+    {id:"4_1",title:"Q1: sigmoid(0)",type:"mcq",diff:"easy",xp:20,
+     q:"What is σ(0) — the sigmoid of zero?",
+     opts:["0","1","0.5","0.73"],ans:2,
+     exp:"σ(0) = 1/(1+e⁰) = 1/(1+1) = 0.5. This is why 0.5 is the default classification threshold — it corresponds to z=0, the decision boundary.",
+     hint:"σ(z) = 1/(1+e^(-z)). What is e^0?"},
+    {id:"4_2",title:"Q2: Implement sigmoid()",type:"code",diff:"easy",xp:35,
+     q:"Implement sigmoid(z). Must work for both scalars and NumPy arrays.",
+     starter:`import numpy as np
+
+def sigmoid(z):
+    # Formula: 1 / (1 + e^(-z))
+    # Use np.exp (not math.exp — that breaks on arrays!)
+    pass
+
+print(sigmoid(0))      # 0.5
+print(sigmoid(100))    # ~1.0
+print(sigmoid(-100))   # ~0.0
+print(sigmoid(np.array([-2, -1, 0, 1, 2])))`,
+     test:`import numpy as np
+assert abs(sigmoid(0) - 0.5) < 1e-9, "sigmoid(0) must be 0.5"
+assert sigmoid(100) > 0.9999, "sigmoid(large) must be ~1"
+assert sigmoid(-100) < 0.0001, "sigmoid(-large) must be ~0"
+arr = sigmoid(np.array([-1., 0., 1.]))
+assert arr.shape == (3,), "Must work on arrays"
+assert abs(arr[1] - 0.5) < 1e-9, "sigmoid(0) in array must be 0.5"
+result = "PASS"`,
+     hints:["Use np.exp(-z) not math.exp — numpy's version works on arrays","One line: return 1 / (1 + np.exp(-z))"],
+     sol:`import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))`},
+    {id:"4_3",title:"Q3: Binary cross-entropy",type:"code",diff:"hard",xp:70,
+     q:"Implement binary_cross_entropy(y_true, y_pred).\nFormula: −(1/m)·Σ[y·log(p) + (1−y)·log(1−p)]\n\nIMPORTANT: clip predictions to [1e-15, 1-1e-15] to avoid log(0)!",
+     starter:`import numpy as np
+
+def binary_cross_entropy(y_true, y_pred):
+    m = len(y_true)
+    eps = 1e-15
+    # Clip to avoid log(0) which is -infinity
+    y_pred = np.clip(y_pred, eps, 1 - eps)
+    # loss = -(1/m) * sum(y*log(p) + (1-y)*log(1-p))
+    pass
+
+y_true = np.array([1., 0., 1., 0.])
+y_pred = np.array([0.9, 0.1, 0.8, 0.3])
+loss = binary_cross_entropy(y_true, y_pred)
+print(f"Loss: {loss:.4f}")   # ~0.164
+
+perfect = np.array([0.999, 0.001, 0.999, 0.001])
+print(f"Near-perfect loss: {binary_cross_entropy(y_true, perfect):.4f}")  # ~0.001`,
+     test:`import numpy as np
+y_t = np.array([1.,1.,0.,0.])
+good = np.array([0.99,0.95,0.02,0.05])
+bad  = np.array([0.02,0.05,0.99,0.95])
+lg = binary_cross_entropy(y_t, good)
+lb = binary_cross_entropy(y_t, bad)
+assert lg < 0.1, f"Good preds should have low loss, got {lg:.4f}"
+assert lb > 2.5, f"Bad preds should have high loss, got {lb:.4f}"
+assert lg < lb, "Good predictions must have lower loss"
+result = "PASS"`,
+     hints:["After clipping: loss = -(1/m) * np.sum(y_true*np.log(y_pred) + (1-y_true)*np.log(1-y_pred))","np.log() is natural log, works element-wise on arrays","The minus sign in front is important — log of a number 0-1 is negative, so negating gives positive loss"],
+     sol:`import numpy as np
+
+def binary_cross_entropy(y_true, y_pred):
+    m = len(y_true)
+    eps = 1e-15
+    y_pred = np.clip(y_pred, eps, 1 - eps)
+    loss = -(1/m)*np.sum(y_true*np.log(y_pred)+(1-y_true)*np.log(1-y_pred))
+    return loss`}
+   ]},
+
+  {day:5,title:"Logistic Regression — Full Training",topic:"Classification",xp:210,
+   concept:`<div class="cb"><div class="cb-h">Logistic Regression Training</div><div class="cb-t">Training is nearly identical to linear regression. Only the forward pass changes (add sigmoid). Surprisingly, the gradient formulas are the same:</div><div class="math">ŷ = σ(X@w + b)</div><div class="math">dw = (1/m)·Xᵀ·(ŷ−y)&nbsp;&nbsp;&nbsp;db = (1/m)·Σ(ŷ−y)</div><div class="cb-t">Update: w = w − α·dw, b = b − α·db</div></div><div class="cb"><div class="cb-h">Evaluation Metrics</div><div class="cb-t"><strong>Accuracy:</strong> % correct — simple but misleading on imbalanced data.<br><br><strong>Precision:</strong> TP/(TP+FP) — of all we predicted positive, how many are actually positive?<br><br><strong>Recall:</strong> TP/(TP+FN) — of all actual positives, how many did we find?<br><br><strong>F1:</strong> 2·P·R/(P+R) — harmonic mean. Use when you need balance.</div></div><div class="wbox">Imbalance trap: 99% of emails aren't spam. Always predicting "not spam" gives 99% accuracy but 0% recall. Always check precision+recall!</div>`,
+   tasks:[
+    {id:"5_1",title:"Q1: Class imbalance",type:"mcq",diff:"medium",xp:30,
+     q:"A cancer detection model predicts 'no cancer' for ALL patients.\nThe dataset has 5% cancer cases. What is its accuracy?",
+     opts:["5%","50%","95%","100%"],ans:2,
+     exp:"95% of patients don't have cancer, so 'no cancer' always = 95% accuracy. But recall=0% — every cancer case missed. This is why accuracy alone is dangerous for medical/fraud/rare-event problems.",
+     hint:"If 5% have cancer and we always predict 'no cancer', how many of our predictions are correct?"},
+    {id:"5_2",title:"Q2: Precision vs Recall",type:"mcq",diff:"medium",xp:30,
+     q:"High recall but low precision in cancer detection means:",
+     opts:["We missed many real cancer cases","We catch most real cancer cases but also flag many healthy people","The model is perfect","We only predict when very confident"],ans:1,
+     exp:"High recall = we catch most actual cancer cases (few false negatives). Low precision = we also flag many healthy people as cancer (many false positives). High recall is preferred in medical contexts — better to over-flag than to miss cancer.",
+     hint:"Recall = TP/(TP+FN). High recall means FN is small. Precision = TP/(TP+FP). Low precision means FP is large."},
+    {id:"5_3",title:"Q3: Full logistic training",type:"code",diff:"hard",xp:90,
+     q:"Implement train_logistic(X, y, alpha=0.1, epochs=1000).\nReturn (w, b).\nForward: ŷ = sigmoid(X@w + b)\nGradients: dw=(1/m)*X.T@(ŷ-y), db=(1/m)*sum(ŷ-y)",
+     starter:`import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+def train_logistic(X, y, alpha=0.1, epochs=1000):
+    m, n = X.shape
+    w = np.zeros(n)
+    b = 0.0
+    for epoch in range(epochs):
+        # 1. forward: z = X @ w + b, then sigmoid
+        # 2. gradients: dw = (1/m)*X.T @ (y_hat - y), db = (1/m)*sum(y_hat-y)
+        # 3. update w, b
+        pass
+    return w, b
+
+# Test on linearly separable data
+np.random.seed(0)
+X = np.random.randn(150, 2)
+y = (X[:,0] + X[:,1] > 0).astype(float)
+w, b = train_logistic(X, y, alpha=0.5, epochs=500)
+preds = (sigmoid(X @ w + b) >= 0.5).astype(float)
+print(f"Accuracy: {np.mean(preds==y)*100:.1f}%")  # Should be >90%`,
+     test:`import numpy as np
+def sigmoid(z): return 1/(1+np.exp(-z))
+np.random.seed(1)
+X = np.random.randn(200,2)
+y = (X[:,0]*2 - X[:,1] > 0).astype(float)
+w, b = train_logistic(X, y, alpha=0.5, epochs=600)
+probs = sigmoid(X @ w + b)
+preds = (probs >= 0.5).astype(float)
+acc = np.mean(preds == y)
+assert acc > 0.88, f"Accuracy should be >88%, got {acc*100:.1f}%"
+result = "PASS"`,
+     hints:["Forward: z = X @ w + b, then y_hat = sigmoid(z)","Gradients: dw = (1/m)*X.T @ (y_hat - y)  and  db = (1/m)*np.sum(y_hat - y)","X.T is X transposed. X.T @ errors vectorizes the sum over all examples."],
+     sol:`import numpy as np
+
+def sigmoid(z): return 1/(1+np.exp(-z))
+
+def train_logistic(X, y, alpha=0.1, epochs=1000):
+    m, n = X.shape
+    w = np.zeros(n)
+    b = 0.0
+    for epoch in range(epochs):
+        z = X @ w + b
+        y_hat = sigmoid(z)
+        errors = y_hat - y
+        dw = (1/m) * X.T @ errors
+        db = (1/m) * np.sum(errors)
+        w -= alpha * dw
+        b -= alpha * db
+    return w, b`},
+    {id:"5_4",title:"Q4: Evaluation metrics",type:"code",diff:"medium",xp:60,
+     q:"Implement compute_metrics(y_true, y_pred) returning a dict:\n{'accuracy':..., 'precision':..., 'recall':..., 'f1':...}",
+     starter:`import numpy as np
+
+def compute_metrics(y_true, y_pred):
+    # TP: predicted 1, actual 1
+    # FP: predicted 1, actual 0
+    # FN: predicted 0, actual 1
+    # TN: predicted 0, actual 0
+    pass
+
+y_true = np.array([1,1,1,0,0,0,1,0])
+y_pred = np.array([1,1,0,0,0,1,1,0])
+m = compute_metrics(y_true, y_pred)
+print(m)
+# accuracy=0.75, precision=0.75, recall=0.75, f1=0.75`,
+     test:`import numpy as np
+y_true = np.array([1,1,1,0,0,0,1,0])
+y_pred = np.array([1,1,0,0,0,1,1,0])
+m = compute_metrics(y_true, y_pred)
+assert abs(m['accuracy']-0.75)<0.01, f"accuracy should be 0.75, got {m['accuracy']}"
+assert abs(m['precision']-0.75)<0.01, f"precision should be 0.75"
+assert abs(m['recall']-0.75)<0.01, f"recall should be 0.75"
+assert 'f1' in m, "must include f1 key"
+result = "PASS"`,
+     hints:["TP = sum((y_pred==1) & (y_true==1)), FP = sum((y_pred==1) & (y_true==0))","Precision = TP/(TP+FP), Recall = TP/(TP+FN), Accuracy = (TP+TN)/total","F1 = 2*P*R/(P+R) — harmonic mean of precision and recall"],
+     sol:`import numpy as np
+
+def compute_metrics(y_true, y_pred):
+    TP = np.sum((y_pred==1)&(y_true==1))
+    FP = np.sum((y_pred==1)&(y_true==0))
+    FN = np.sum((y_pred==0)&(y_true==1))
+    TN = np.sum((y_pred==0)&(y_true==0))
+    acc = (TP+TN)/len(y_true)
+    prec = TP/(TP+FP) if TP+FP>0 else 0
+    rec  = TP/(TP+FN) if TP+FN>0 else 0
+    f1   = 2*prec*rec/(prec+rec) if prec+rec>0 else 0
+    return {'accuracy':acc,'precision':prec,'recall':rec,'f1':f1}`}
+   ]},
+
+  {day:6,title:"Regularization — L1 & L2",topic:"Overfitting",xp:165,
+   concept:`<div class="cb"><div class="cb-h">The Overfitting Problem</div><div class="cb-t">A model that memorizes training data performs poorly on new data. Signs: training loss ↓ but validation loss ↑.<br><br><strong>Regularization</strong> adds a penalty for large weights, discouraging the model from fitting noise.</div></div><div class="cb"><div class="cb-h">L2 Regularization (Ridge)</div><div class="math">J = MSE + (λ/2m)·Σwᵢ²</div><div class="cb-t">Penalizes large weights. Keeps them <strong>small but nonzero</strong>. Gradient update: dw += (λ/m)·w. λ controls strength. Never regularize the bias b!</div></div><div class="cb"><div class="cb-h">L1 Regularization (Lasso)</div><div class="math">J = MSE + (λ/m)·Σ|wᵢ|</div><div class="cb-t">Penalizes absolute values. Can drive weights to <strong>exactly zero</strong> — automatic feature selection. Use when most features are likely irrelevant.</div></div><div class="ibox"><div class="ibox-lbl">📌 When to use which</div><div class="ibox-t"><strong>L2 (Ridge)</strong>: most of the time. Smooth, stable, works well with correlated features.<br><strong>L1 (Lasso)</strong>: when you have many features and expect sparsity (most weights = 0).</div></div>`,
+   tasks:[
+    {id:"6_1",title:"Q1: L1 vs L2",type:"mcq",diff:"medium",xp:30,
+     q:"You have 500 features but believe only ~10 are truly relevant.\nWhich regularization should you prefer?",
+     opts:["L2 Ridge — smooth shrinkage of all weights","L1 Lasso — can zero out irrelevant features","No regularization — let the model decide","Both equally good"],ans:1,
+     exp:"L1 (Lasso) is perfect for sparse problems. It drives irrelevant weights to exactly zero, doing automatic feature selection. L2 would shrink them toward zero but keep all 500 active. Classic interview question!",
+     hint:"Which regularization can produce EXACTLY zero weights, effectively removing features?"},
+    {id:"6_2",title:"Q2: Lambda effect",type:"mcq",diff:"easy",xp:25,
+     q:"Increasing λ (lambda) in L2 regularization causes the model to:",
+     opts:["Overfit more","Have larger weights","Become simpler with smaller weights","Train faster"],ans:2,
+     exp:"Larger λ = bigger penalty for large weights = model forced to keep weights small = simpler model. High bias (underfitting) is the risk of making λ too large. This is the bias-variance tradeoff controlled by λ.",
+     hint:"More regularization = more penalty for complexity = simpler model"},
+    {id:"6_3",title:"Q3: L2 regularized cost",type:"code",diff:"medium",xp:55,
+     q:"Implement compute_cost_l2(X, y, w, b, lam=0.1)\nAdds L2 penalty: (lam/(2*m)) * sum(w²)\nDo NOT penalize b!",
+     starter:`import numpy as np
+
+def compute_cost_l2(X, y, w, b, lam=0.1):
+    m = len(y)
+    # Base cost (MSE): same as before
+    predictions = X @ w + b
+    mse = (1/(2*m)) * np.sum((predictions - y)**2)
+    # L2 penalty: (lam/(2*m)) * sum(w^2)   ← only w, not b
+    pass
+
+np.random.seed(0)
+X = np.random.randn(30, 3)
+y = np.random.randn(30)
+w = np.array([3., 2., 1.]); b = 0.5
+
+c0 = compute_cost_l2(X, y, w, b, lam=0)
+c1 = compute_cost_l2(X, y, w, b, lam=1.0)
+print(f"No reg: {c0:.4f}")
+print(f"With L2: {c1:.4f}")  # Should be larger`,
+     test:`import numpy as np
+np.random.seed(0); X=np.random.randn(20,3); y=np.random.randn(20)
+w=np.array([1.,2.,3.]); b=0.5
+c0=compute_cost_l2(X,y,w,b,lam=0)
+c1=compute_cost_l2(X,y,w,b,lam=1.0)
+assert c1 > c0, "L2 regularization must increase cost"
+w_s=np.array([0.01,0.01,0.01])
+cs=compute_cost_l2(X,y,w_s,b,lam=1.0)
+cl=compute_cost_l2(X,y,w,b,lam=1.0)
+assert cl > cs+0.2, "Larger weights should incur larger L2 penalty"
+result = "PASS"`,
+     hints:["l2_penalty = (lam/(2*m)) * np.sum(w**2)","Only penalize w, NOT b! return mse + l2_penalty","np.sum(w**2) squares every weight and sums them"],
+     sol:`import numpy as np
+
+def compute_cost_l2(X, y, w, b, lam=0.1):
+    m = len(y)
+    predictions = X @ w + b
+    mse = (1/(2*m)) * np.sum((predictions - y)**2)
+    l2 = (lam/(2*m)) * np.sum(w**2)
+    return mse + l2`},
+    {id:"6_4",title:"Q4: L2 gradient",type:"code",diff:"medium",xp:55,
+     q:"Implement gradient_l2(X, y, w, b, lam) returning (dw, db).\nL2 adds (lam/m)*w to dw — but NOT to db.",
+     starter:`import numpy as np
+
+def gradient_l2(X, y, w, b, lam=0.1):
+    m = len(y)
+    predictions = X @ w + b
+    errors = predictions - y
+    # Base gradients (same as before)
+    dw = (1/m) * X.T @ errors
+    db = (1/m) * np.sum(errors)
+    # Add L2 term to dw only (not db!)
+    pass
+
+np.random.seed(0)
+X = np.random.randn(10,2); y = np.random.randn(10)
+w = np.array([2., 3.]); b = 1.0
+dw_reg, db_reg = gradient_l2(X, y, w, b, lam=1.0)
+dw_no,  db_no  = gradient_l2(X, y, w, b, lam=0.0)
+print(f"dw with L2: {dw_reg}")
+print(f"dw without: {dw_no}")
+print(f"db with L2: {db_reg:.4f} (should equal no-reg: {db_no:.4f})")`,
+     test:`import numpy as np
+np.random.seed(0); X=np.random.randn(10,2); y=np.random.randn(10)
+w=np.array([2.,3.]); b=1.0
+dw_r,db_r=gradient_l2(X,y,w,b,lam=1.0)
+dw_n,db_n=gradient_l2(X,y,w,b,lam=0.0)
+assert abs(db_r-db_n)<1e-9, "Bias gradient must NOT be affected by L2"
+assert not np.allclose(dw_r,dw_n), "Weight gradients MUST differ with regularization"
+result = "PASS"`,
+     hints:["The L2 gradient term is + (lam/m) * w","Just add it to dw: dw = dw + (lam/m)*w   or   dw += (lam/m)*w","db is NOT regularized — do not add anything to db"],
+     sol:`import numpy as np
+
+def gradient_l2(X, y, w, b, lam=0.1):
+    m = len(y)
+    predictions = X @ w + b
+    errors = predictions - y
+    dw = (1/m) * X.T @ errors + (lam/m) * w
+    db = (1/m) * np.sum(errors)
+    return dw, db`}
+   ]},
+
+  {day:7,title:"Mini Project — Titanic Survival",topic:"End-to-End ML",xp:240,
+   concept:`<div class="cb"><div class="cb-h">End-to-End ML Workflow</div><div class="cb-t">Real ML follows: <strong>Load → Explore → Clean → Feature Engineer → Train → Evaluate</strong>.<br><br>Titanic: predict survival (0/1) from Pclass, Sex, Age, SibSp, Parch, Fare.</div></div><div class="cb"><div class="cb-h">Feature Engineering Tips</div><div class="cb-t">• <strong>Sex</strong>: encode male=0, female=1<br>• <strong>Age</strong>: ~20% missing → fill with median (29.7)<br>• <strong>FamilySize</strong> = SibSp + Parch + 1 (include yourself)<br>• <strong>IsAlone</strong> = 1 if FamilySize==1<br>• <strong>Pclass</strong>: already numeric (1=first, 3=third)<br>• <strong>Fare</strong>: normalize — huge outliers</div></div><div class="ibox"><div class="ibox-lbl">📊 Key data insight</div><div class="ibox-t">"Women and children first" is real: female survival ≈73%, male ≈19%. First class ≈63%, third class ≈24%. <strong>Sex is the strongest predictor</strong> in this dataset.</div></div><div class="wbox">Never impute (fill missing values) using statistics from test data. Compute median from training data, apply to both.</div>`,
+   tasks:[
+    {id:"7_1",title:"Q1: Family size",type:"mcq",diff:"easy",xp:20,
+     q:"A passenger has SibSp=2 and Parch=1.\nWhat is their FamilySize?",
+     opts:["2","3","4","1"],ans:2,
+     exp:"FamilySize = SibSp + Parch + 1 = 2 + 1 + 1 = 4. The +1 counts the passenger themselves. They're in a group of 4.",
+     hint:"FamilySize = SibSp + Parch + 1 (the +1 is the passenger themselves)"},
+    {id:"7_2",title:"Q2: Missing values strategy",type:"mcq",diff:"medium",xp:25,
+     q:"Age has 20% missing values. Which strategy is WORST for a baseline model?",
+     opts:["Fill with median age","Fill with mean age","Drop all rows with missing age","Fill with 0"],ans:3,
+     exp:"Filling age=0 implies passengers are newborns, which is nonsensical. The model will learn wrong patterns. Median is best (robust to outliers), mean is acceptable. Dropping rows loses data but is still better than using 0.",
+     hint:"Which value is completely meaningless as an age replacement?"},
+    {id:"7_3",title:"Q3: Preprocess passenger",type:"code",diff:"medium",xp:70,
+     q:"Implement preprocess_passenger(p) — takes a passenger dict,\nreturns numpy array [Pclass, sex, age, FamilySize, Fare]\n\nRules:\n- male→0, female→1\n- Missing age→29.7 (Titanic median)\n- FamilySize = SibSp + Parch + 1",
+     starter:`import numpy as np
+
+def preprocess_passenger(p):
+    """p = {'Pclass':int, 'Sex':str, 'Age':float|None,
+            'SibSp':int, 'Parch':int, 'Fare':float}"""
+    # 1. encode sex
+    # 2. fill missing age
+    # 3. compute FamilySize
+    # 4. return np.array([Pclass, sex, age, FamilySize, Fare])
+    pass
+
+p1 = {'Pclass':1,'Sex':'female','Age':29.0,'SibSp':0,'Parch':0,'Fare':211.3}
+p2 = {'Pclass':3,'Sex':'male','Age':None,'SibSp':1,'Parch':0,'Fare':7.25}
+print(preprocess_passenger(p1))  # [1. 1. 29. 1. 211.3]
+print(preprocess_passenger(p2))  # [3. 0. 29.7 2. 7.25]`,
+     test:`import numpy as np
+p_f={'Pclass':1,'Sex':'female','Age':25.,'SibSp':1,'Parch':0,'Fare':100.}
+p_m={'Pclass':3,'Sex':'male','Age':None,'SibSp':0,'Parch':0,'Fare':7.25}
+f=preprocess_passenger(p_f); m=preprocess_passenger(p_m)
+assert f[1]==1.0, f"female should be 1, got {f[1]}"
+assert m[1]==0.0, f"male should be 0, got {m[1]}"
+assert m[2]==29.7, f"missing age should be 29.7, got {m[2]}"
+assert f[3]==2.0, f"FamilySize 1+0+1=2, got {f[3]}"
+assert len(f)==5, "must return 5 features"
+result = "PASS"`,
+     hints:["sex = 1.0 if p['Sex']=='female' else 0.0","age = p['Age'] if p['Age'] is not None else 29.7","family = p['SibSp'] + p['Parch'] + 1, then return np.array([p['Pclass'], sex, age, family, p['Fare']])"],
+     sol:`import numpy as np
+
+def preprocess_passenger(p):
+    sex = 1.0 if p['Sex']=='female' else 0.0
+    age = p['Age'] if p['Age'] is not None else 29.7
+    family = p['SibSp'] + p['Parch'] + 1
+    return np.array([p['Pclass'], sex, age, family, p['Fare']], dtype=float)`},
+    {id:"7_4",title:"Q4: Full Titanic pipeline",type:"code",diff:"hard",xp:125,
+     q:"Implement train_and_predict(X_train, y_train, X_test).\nUse logistic regression (normalize features first!).\nMust return predictions array for X_test.",
+     starter:`import numpy as np
+
+def sigmoid(z): return 1/(1+np.exp(-z))
+
+def train_and_predict(X_train, y_train, X_test):
+    # 1. Normalize features (fit on train, apply to test)
+    mu = X_train.mean(axis=0)
+    sigma = X_train.std(axis=0) + 1e-8
+    X_tr_n = (X_train - mu) / sigma
+    X_te_n = (X_test - mu) / sigma
+    # 2. Train logistic regression
+    # 3. Return binary predictions for X_test
+    pass
+
+# Synthetic Titanic test
+np.random.seed(42)
+n=300; pclass=np.random.choice([1,2,3],n).reshape(-1,1)
+sex=np.random.choice([0,1],n).reshape(-1,1)
+age=(np.random.randn(n)*15+35).reshape(-1,1)
+fam=np.random.randint(1,5,n).reshape(-1,1)
+fare=np.abs(np.random.randn(n)*30+30).reshape(-1,1)
+X=np.hstack([pclass,sex,age,fam,fare]).astype(float)
+y=(2.5*sex.ravel()-0.5*pclass.ravel()+np.random.randn(n)*0.4>0).astype(float)
+from sklearn.model_selection import train_test_split
+X_tr,X_te,y_tr,y_te=train_test_split(X,y,test_size=0.2,random_state=42)
+preds=train_and_predict(X_tr,y_tr,X_te)
+print(f"Accuracy: {np.mean(preds==y_te)*100:.1f}%")`,
+     test:`import numpy as np
+np.random.seed(42)
+n=300; pclass=np.random.choice([1,2,3],n).reshape(-1,1)
+sex=np.random.choice([0,1],n).reshape(-1,1)
+age=(np.random.randn(n)*15+35).reshape(-1,1)
+fam=np.random.randint(1,5,n).reshape(-1,1)
+fare=np.abs(np.random.randn(n)*30+30).reshape(-1,1)
+X=np.hstack([pclass,sex,age,fam,fare]).astype(float)
+y=(2.5*sex.ravel()-0.5*pclass.ravel()+np.random.randn(n)*0.4>0).astype(float)
+split=int(0.8*n)
+X_tr,y_tr=X[:split],y[:split]; X_te,y_te=X[split:],y[split:]
+preds=train_and_predict(X_tr,y_tr,X_te)
+acc=np.mean(preds==y_te)
+assert acc>0.78, f"Need >78% accuracy, got {acc*100:.1f}%"
+result = "PASS"`,
+     hints:["Normalize: mu=X_train.mean(axis=0), sigma=X_train.std(axis=0)+1e-8","Train logistic: w=np.zeros(n); loop: z=X@w+b, y_hat=sigmoid(z), dw=(1/m)*X.T@(y_hat-y), db=(1/m)*sum(y_hat-y)","Return: (sigmoid(X_te_n @ w + b) >= 0.5).astype(int)"],
+     sol:`import numpy as np
+
+def sigmoid(z): return 1/(1+np.exp(-z))
+
+def train_and_predict(X_train, y_train, X_test):
+    mu=X_train.mean(axis=0); sigma=X_train.std(axis=0)+1e-8
+    X_tr_n=(X_train-mu)/sigma; X_te_n=(X_test-mu)/sigma
+    m,n_f=X_tr_n.shape; w=np.zeros(n_f); b=0.0
+    for _ in range(1000):
+        z=X_tr_n@w+b; yh=sigmoid(z); e=yh-y_train
+        dw=(1/m)*X_tr_n.T@e; db=(1/m)*np.sum(e)
+        w-=0.3*dw; b-=0.3*db
+    return (sigmoid(X_te_n@w+b)>=0.5).astype(int)`}
+   ]}
+ ]},
+ {phase:"Phase 2 — sklearn & Tree Models",col:"#60a5fa",days:[
+  {day:8,title:"sklearn Pipelines & Cross-Validation",topic:"sklearn",xp:160,
+   concept:`<div class="cb"><div class="cb-h">Why sklearn?</div><div class="cb-t">After building from scratch, sklearn gives battle-tested implementations with a consistent API: every model has <span class="ic">.fit()</span>, <span class="ic">.predict()</span>, <span class="ic">.score()</span>.</div></div><div class="cb"><div class="cb-h">The Pipeline Pattern</div><div class="cb-t">Pipeline chains transformers + a model. It prevents data leakage!</div><div class="csnip"><pre><span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
+
+pipe = <span class="fn">Pipeline</span>([
+    (<span class="st">'scaler'</span>, <span class="fn">StandardScaler</span>()),
+    (<span class="st">'model'</span>, <span class="fn">LogisticRegression</span>())
+])
+pipe.<span class="fn">fit</span>(X_train, y_train)
+pipe.<span class="fn">predict</span>(X_test)</pre></div></div><div class="wbox">Data leakage: if you fit StandardScaler on ENTIRE data before splitting, test statistics leak into training. Pipeline prevents this — scaler fits only on training fold automatically.</div>`,
+   tasks:[
+    {id:"8_1",title:"Q1: Data leakage",type:"mcq",diff:"medium",xp:30,
+     q:"You fit StandardScaler on your ENTIRE dataset (train+test), then split.\nWhy is this data leakage?",
+     opts:["The model sees test labels during training","The scaler used test statistics, so test data gets unrealistically normalized","StandardScaler doesn't work on split data","Scaling never causes leakage"],ans:1,
+     exp:"When scaling uses the entire dataset's mean/std, the test data's statistics influence training preprocessing. In production you'd never have future data to compute these stats. Rule: always fit scaler on train only, then transform both train and test.",
+     hint:"In real deployment, you don't have future data when training. What information would the scaler be illegitimately using?"},
+    {id:"8_2",title:"Q2: Cross-validation benefit",type:"mcq",diff:"medium",xp:25,
+     q:"5-fold cross-validation's main benefit over a single train/test split is:",
+     opts:["Trains 5x faster","More reliable performance estimate using all data","Automatically prevents overfitting","Selects best hyperparameters"],ans:1,
+     exp:"A single split's performance depends on random chance (which points ended up where). 5-fold CV averages over 5 different splits, giving a much more stable, reliable estimate of how the model generalizes.",
+     hint:"What's unreliable about relying on just one random 80/20 split?"},
+    {id:"8_3",title:"Q3: Build sklearn Pipeline",type:"code",diff:"medium",xp:55,
+     q:"Build a sklearn Pipeline: StandardScaler + LogisticRegression.\nFit on X_train, predict on X_test.\nAlso run 5-fold cross-validation and print mean±std.",
+     starter:`import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.datasets import make_classification
+
+X, y = make_classification(n_samples=400, n_features=10, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42)
+
+# Build and train a Pipeline here:
+# pipe = Pipeline([...])
+# pipe.fit(...)
+# cv_scores = cross_val_score(...)
+
+# Print results
+# print(f"Test accuracy: {pipe.score(X_test, y_test):.3f}")
+# print(f"CV: {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")`,
+     test:`import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+X,y=make_classification(n_samples=300,n_features=8,random_state=42)
+X_tr,X_te,y_tr,y_te=train_test_split(X,y,test_size=0.2,random_state=42)
+pipe.fit(X_tr,y_tr)
+assert hasattr(pipe,'predict'), "pipe must be a fitted sklearn Pipeline"
+acc=pipe.score(X_te,y_te)
+assert acc>0.80, f"Test accuracy should be >80%, got {acc:.3f}"
+result = "PASS"`,
+     hints:["pipe = Pipeline([('scaler', StandardScaler()), ('model', LogisticRegression(max_iter=200))])","pipe.fit(X_train, y_train)","cv_scores = cross_val_score(pipe, X_train, y_train, cv=5)"],
+     sol:`from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_score
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+
+X,y=make_classification(n_samples=400,n_features=10,random_state=42)
+X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=42)
+pipe=Pipeline([('scaler',StandardScaler()),('model',LogisticRegression(max_iter=300))])
+pipe.fit(X_train,y_train)
+cv_scores=cross_val_score(pipe,X_train,y_train,cv=5)
+print(f"Test: {pipe.score(X_test,y_test):.3f}, CV: {cv_scores.mean():.3f}±{cv_scores.std():.3f}")`},
+    {id:"8_4",title:"Q4: Confusion matrix",type:"code",diff:"medium",xp:50,
+     q:"Implement confusion_matrix_vals(y_true, y_pred)\nReturning dict: {'TP':..., 'FP':..., 'FN':..., 'TN':...}",
+     starter:`import numpy as np
+
+def confusion_matrix_vals(y_true, y_pred):
+    # TP: actual=1 AND predicted=1
+    # FP: actual=0 AND predicted=1
+    # FN: actual=1 AND predicted=0
+    # TN: actual=0 AND predicted=0
+    pass
+
+y_true = np.array([1,1,1,0,0,0,1,0,1,0])
+y_pred = np.array([1,0,1,0,1,0,1,0,0,0])
+cm = confusion_matrix_vals(y_true, y_pred)
+print(cm)  # TP=3, FP=1, FN=2, TN=4`,
+     test:`import numpy as np
+y_true=np.array([1,1,1,0,0,0,1,0,1,0])
+y_pred=np.array([1,0,1,0,1,0,1,0,0,0])
+cm=confusion_matrix_vals(y_true,y_pred)
+assert cm['TP']==3,f"TP should be 3, got {cm['TP']}"
+assert cm['FP']==1,f"FP should be 1, got {cm['FP']}"
+assert cm['FN']==2,f"FN should be 2, got {cm['FN']}"
+assert cm['TN']==4,f"TN should be 4, got {cm['TN']}"
+result = "PASS"`,
+     hints:["TP = np.sum((y_pred==1) & (y_true==1))","FP = np.sum((y_pred==1) & (y_true==0))","FN = np.sum((y_pred==0) & (y_true==1)), TN = np.sum((y_pred==0) & (y_true==0))"],
+     sol:`import numpy as np
+
+def confusion_matrix_vals(y_true, y_pred):
+    TP=int(np.sum((y_pred==1)&(y_true==1)))
+    FP=int(np.sum((y_pred==1)&(y_true==0)))
+    FN=int(np.sum((y_pred==0)&(y_true==1)))
+    TN=int(np.sum((y_pred==0)&(y_true==0)))
+    return {'TP':TP,'FP':FP,'FN':FN,'TN':TN}`}
+   ]},
+
+  {day:9,title:"Decision Trees — Gini & Splitting",topic:"Tree Models",xp:200,
+   concept:`<div class="cb"><div class="cb-h">Decision Trees Intuition</div><div class="cb-t">Like playing 20 Questions. Ask yes/no questions about features to narrow down the answer. At each node, split data on the feature+threshold that makes subsets most <strong>pure</strong> (same class).</div></div><div class="cb"><div class="cb-h">Gini Impurity</div><div class="math">Gini(node) = 1 − Σpᵢ²</div><div class="cb-t">pᵢ = fraction of class i in the node. Pure node (all same class): Gini=0. Maximally mixed (50/50): Gini=0.5.</div></div><div class="cb"><div class="cb-h">Information Gain</div><div class="math">IG = Gini(parent) − [n_L/n·Gini(left) + n_R/n·Gini(right)]</div><div class="cb-t">We pick the split with <strong>highest IG</strong>. We want children to be purer than the parent.</div></div><div class="wbox">Trees with no max_depth will perfectly memorize training data (each leaf has exactly 1 sample). Always set max_depth or min_samples_split.</div>`,
+   tasks:[
+    {id:"9_1",title:"Q1: Gini of a pure node",type:"mcq",diff:"easy",xp:20,
+     q:"A node contains 10 samples, all class A. What is its Gini impurity?",
+     opts:["1.0","0.5","0.0","Cannot be determined"],ans:2,
+     exp:"Gini = 1 - p_A² = 1 - 1² = 0. A pure node has Gini=0 — no impurity. This is the best possible state for a decision tree leaf.",
+     hint:"Gini = 1 - Σpᵢ². If all samples are one class, p₁=1 and all other p=0."},
+    {id:"9_2",title:"Q2: Gini of 50/50 split",type:"mcq",diff:"easy",xp:20,
+     q:"A node has [5 class-A, 5 class-B]. Compute Gini impurity.",
+     opts:["0.0","0.25","0.5","1.0"],ans:2,
+     exp:"p_A=0.5, p_B=0.5. Gini = 1 - (0.5² + 0.5²) = 1 - (0.25+0.25) = 1 - 0.5 = 0.5. This is the maximum Gini — maximally uncertain.",
+     hint:"Gini = 1 - (p_A² + p_B²). With equal split, p_A=p_B=0.5"},
+    {id:"9_3",title:"Q3: Implement gini_impurity()",type:"code",diff:"medium",xp:55,
+     q:"Implement gini_impurity(y) for a numpy array of class labels.\nFormula: 1 - Σ(count_i / total)²",
+     starter:`import numpy as np
+
+def gini_impurity(y):
+    # Count occurrences of each class
+    # Compute fractions pᵢ = count_i / total
+    # Return 1 - sum(pᵢ²)
+    pass
+
+print(gini_impurity(np.array([1,1,1,1])))     # 0.0 — pure
+print(gini_impurity(np.array([0,0,1,1])))     # 0.5 — max impurity
+print(gini_impurity(np.array([0,1,2,0,1,2])))# ~0.667 — 3 equal classes`,
+     test:`import numpy as np
+assert abs(gini_impurity(np.array([1,1,1,1]))-0.0)<1e-9,"Pure should be 0"
+assert abs(gini_impurity(np.array([0,0,1,1]))-0.5)<1e-9,"50/50 should be 0.5"
+g3=gini_impurity(np.array([0,0,1,1,2,2]))
+assert abs(g3-2/3)<0.01,f"3-class equal should be ~0.667, got {g3:.4f}"
+result = "PASS"`,
+     hints:["Use np.unique(y, return_counts=True) to get classes and their counts","Fractions: p = counts / len(y)","Return 1 - np.sum(p**2)"],
+     sol:`import numpy as np
+
+def gini_impurity(y):
+    _, counts = np.unique(y, return_counts=True)
+    p = counts / len(y)
+    return 1 - np.sum(p**2)`},
+    {id:"9_4",title:"Q4: Information gain",type:"code",diff:"hard",xp:60,
+     q:"Implement information_gain(y_parent, y_left, y_right).\nIG = gini(parent) - weighted_avg(gini(left), gini(right))\nWeight = n_children / n_parent",
+     starter:`import numpy as np
+
+def gini_impurity(y):
+    _, counts = np.unique(y, return_counts=True)
+    p = counts / len(y)
+    return 1 - np.sum(p**2)
+
+def information_gain(y_parent, y_left, y_right):
+    # IG = gini(parent) - (n_L/n)*gini(left) - (n_R/n)*gini(right)
+    pass
+
+y_p = np.array([0,0,0,1,1,1])
+y_l = np.array([0,0,0])  # pure
+y_r = np.array([1,1,1])  # pure
+print(f"Perfect split IG: {information_gain(y_p, y_l, y_r):.4f}")  # 0.5
+
+y_b1 = np.array([0,1,0])
+y_b2 = np.array([1,0,1])
+print(f"Random split IG: {information_gain(y_p, y_b1, y_b2):.4f}")  # ~0.0`,
+     test:`import numpy as np
+def gini_impurity(y):
+    _,c=np.unique(y,return_counts=True); p=c/len(y); return 1-np.sum(p**2)
+yp=np.array([0,0,0,1,1,1])
+yl=np.array([0,0,0]); yr=np.array([1,1,1])
+ig_perfect=information_gain(yp,yl,yr)
+assert ig_perfect>0.45,f"Perfect split IG should be ~0.5, got {ig_perfect:.4f}"
+yb1=np.array([0,1,0]); yb2=np.array([1,0,1])
+ig_bad=information_gain(yp,yb1,yb2)
+assert ig_perfect>ig_bad,"Perfect split must have higher IG"
+result = "PASS"`,
+     hints:["n=len(y_parent), n_L=len(y_left), n_R=len(y_right)","weighted = (n_L/n)*gini_impurity(y_left) + (n_R/n)*gini_impurity(y_right)","return gini_impurity(y_parent) - weighted"],
+     sol:`import numpy as np
+
+def gini_impurity(y):
+    _,c=np.unique(y,return_counts=True); p=c/len(y); return 1-np.sum(p**2)
+
+def information_gain(y_parent, y_left, y_right):
+    n=len(y_parent); nL=len(y_left); nR=len(y_right)
+    return gini_impurity(y_parent)-(nL/n)*gini_impurity(y_left)-(nR/n)*gini_impurity(y_right)`},
+    {id:"9_5",title:"Q5: Build a decision tree",type:"code",diff:"hard",xp:75,
+     q:"Implement build_tree(X, y, depth, max_depth) and predict_tree(node, x).\nEach node is a dict: {'feature','threshold','left','right'} or {'leaf','class'}",
+     starter:`import numpy as np
+
+def gini_impurity(y):
+    if len(y)==0: return 0
+    _,c=np.unique(y,return_counts=True); p=c/len(y); return 1-np.sum(p**2)
+
+def best_split(X, y):
+    best_ig=-1; best_f=0; best_t=0
+    for f in range(X.shape[1]):
+        for t in np.unique(X[:,f]):
+            l=y[X[:,f]<=t]; r=y[X[:,f]>t]
+            if len(l)==0 or len(r)==0: continue
+            ig=gini_impurity(y)-(len(l)/len(y))*gini_impurity(l)-(len(r)/len(y))*gini_impurity(r)
+            if ig>best_ig: best_ig=ig; best_f=f; best_t=t
+    return best_f, best_t
+
+def build_tree(X, y, depth=0, max_depth=3):
+    # Base cases: max depth reached OR pure node
+    # Otherwise: find best split, recurse on left and right
+    pass
+
+def predict_tree(node, x):
+    # If leaf: return node['class']
+    # Else: go left if x[feature] <= threshold, else go right
+    pass
+
+# Test:
+X=np.array([[1,2],[1,3],[2,1],[2,2],[5,5],[5,6],[6,5],[6,6]],dtype=float)
+y=np.array([0,0,0,0,1,1,1,1])
+tree=build_tree(X,y,max_depth=2)
+preds=np.array([predict_tree(tree,x) for x in X])
+print(f"Accuracy: {np.mean(preds==y)*100:.0f}%")  # Should be 100%`,
+     test:`import numpy as np
+def gini_impurity(y):
+    if len(y)==0: return 0
+    _,c=np.unique(y,return_counts=True); p=c/len(y); return 1-np.sum(p**2)
+def best_split(X,y):
+    best_ig=-1; bf=0; bt=0
+    for f in range(X.shape[1]):
+        for t in np.unique(X[:,f]):
+            l=y[X[:,f]<=t]; r=y[X[:,f]>t]
+            if len(l)==0 or len(r)==0: continue
+            ig=gini_impurity(y)-(len(l)/len(y))*gini_impurity(l)-(len(r)/len(y))*gini_impurity(r)
+            if ig>best_ig: best_ig=ig; bf=f; bt=t
+    return bf,bt
+X=np.array([[1,2],[1,3],[2,1],[2,2],[5,5],[5,6],[6,5],[6,6]],dtype=float)
+y=np.array([0,0,0,0,1,1,1,1])
+tree=build_tree(X,y,depth=0,max_depth=3)
+preds=np.array([predict_tree(tree,x) for x in X])
+acc=np.mean(preds==y)
+assert acc>0.9,f"Tree accuracy should be >90%, got {acc*100:.0f}%"
+assert isinstance(tree,dict),"build_tree must return a dict"
+result = "PASS"`,
+     hints:["Leaf: if depth>=max_depth or all same class → return {'leaf':True,'class':most_common(y)}","Split: f,t=best_split(X,y); mask=X[:,f]<=t; left=build_tree(X[mask],y[mask],depth+1,max_depth)","Predict: if node.get('leaf'): return node['class'], else: go left if x[node['feature']]<=node['threshold']"],
+     sol:`import numpy as np
+
+def gini_impurity(y):
+    if len(y)==0: return 0
+    _,c=np.unique(y,return_counts=True); p=c/len(y); return 1-np.sum(p**2)
+
+def best_split(X,y):
+    best_ig=-1; bf=0; bt=0
+    for f in range(X.shape[1]):
+        for t in np.unique(X[:,f]):
+            l=y[X[:,f]<=t]; r=y[X[:,f]>t]
+            if len(l)==0 or len(r)==0: continue
+            ig=gini_impurity(y)-(len(l)/len(y))*gini_impurity(l)-(len(r)/len(y))*gini_impurity(r)
+            if ig>best_ig: best_ig=ig; bf=f; bt=t
+    return bf,bt
+
+def build_tree(X, y, depth=0, max_depth=3):
+    classes, counts = np.unique(y, return_counts=True)
+    majority = classes[np.argmax(counts)]
+    if depth>=max_depth or len(classes)==1:
+        return {'leaf':True,'class':majority}
+    f,t=best_split(X,y); mask=X[:,f]<=t
+    if mask.all() or (~mask).all():
+        return {'leaf':True,'class':majority}
+    return {'leaf':False,'feature':f,'threshold':t,
+            'left':build_tree(X[mask],y[mask],depth+1,max_depth),
+            'right':build_tree(X[~mask],y[~mask],depth+1,max_depth)}
+
+def predict_tree(node, x):
+    if node['leaf']: return node['class']
+    if x[node['feature']]<=node['threshold']: return predict_tree(node['left'],x)
+    return predict_tree(node['right'],x)`}
+   ]},
+
+  {day:10,title:"Random Forests & Ensemble Methods",topic:"Ensemble",xp:195,
+   concept:`<div class="cb"><div class="cb-h">Bagging — Bootstrap Aggregating</div><div class="cb-t">A single decision tree overfits. Solution: train <strong>many different trees</strong> and average their predictions.<br><br>Each tree trains on a <strong>bootstrap sample</strong> — random sample WITH replacement, same size as original dataset (~63% unique samples per tree).</div></div><div class="cb"><div class="cb-h">Random Forest = Bagging + Feature Randomness</div><div class="cb-t">At each split, only consider a random subset of features (√n features). This <strong>decorrelates the trees</strong> — even if one feature dominates, not all trees will use it.<br><br>Final prediction: majority vote (classification) or average (regression).</div></div><div class="ibox"><div class="ibox-lbl">📊 Why averaging reduces variance</div><div class="ibox-t">If each tree makes independent errors, averaging cancels them out. Mathematically: Var(avg of n independent vars) = Var(single)/n. More trees → lower variance (but not lower bias).</div></div>`,
+   tasks:[
+    {id:"10_1",title:"Q1: What bagging reduces",type:"mcq",diff:"medium",xp:25,
+     q:"Bagging reduces which type of model error?",
+     opts:["Bias — systematic errors","Variance — overfitting to training data","Both bias and variance equally","Neither, it only speeds up training"],ans:1,
+     exp:"Bagging reduces variance by averaging many overfit models. Each tree overfits differently (to different bootstrap samples), and averaging cancels out the noise. Bias stays the same — if trees are systematically wrong, averaging doesn't fix that.",
+     hint:"Variance = how much the model changes with different training data. Bagging trains on different samples and averages..."},
+    {id:"10_2",title:"Q2: Bootstrap sampling",type:"mcq",diff:"easy",xp:20,
+     q:"Bootstrap sampling draws n samples WITH replacement from n originals.\nApproximately what fraction of original samples appear in each bootstrap?",
+     opts:["100%","80%","63%","50%"],ans:2,
+     exp:"The probability that a sample is NOT chosen in one draw is (1-1/n). Over n draws, probability of never being chosen = (1-1/n)^n → e^(-1) ≈ 0.368 as n→∞. So ~63.2% of original samples appear in each bootstrap (the rest are 'out-of-bag').",
+     hint:"For large n, the probability that any one sample is never selected approaches e^(-1) ≈ 36.8%"},
+    {id:"10_3",title:"Q3: Implement bootstrap",type:"code",diff:"medium",xp:50,
+     q:"Implement bootstrap_sample(X, y) — sample n rows WITH replacement.",
+     starter:`import numpy as np
+
+def bootstrap_sample(X, y):
+    n = len(X)
+    # Sample n indices with replacement
+    # Return X[indices], y[indices]
+    pass
+
+np.random.seed(42)
+X = np.arange(20).reshape(10,2).astype(float)
+y = np.arange(10).astype(float)
+X_b, y_b = bootstrap_sample(X, y)
+print(f"Original: {len(X)} samples, Bootstrap: {len(X_b)} samples")
+print(f"Unique samples: {len(np.unique(y_b))}/10 (~6.3 expected)")`,
+     test:`import numpy as np
+np.random.seed(42)
+X=np.arange(100).reshape(50,2).astype(float); y=np.arange(50).astype(float)
+X_b,y_b=bootstrap_sample(X,y)
+assert X_b.shape==X.shape,f"Shape must match: {X_b.shape}"
+assert y_b.shape==y.shape
+u=len(np.unique(y_b))
+assert u<50,"Must have duplicates (sampling with replacement)"
+assert u>25,f"Should have ~63% unique samples, got {u}/50"
+result = "PASS"`,
+     hints:["indices = np.random.choice(n, size=n, replace=True)  ← the key: replace=True!","Return X[indices], y[indices]"],
+     sol:`import numpy as np
+
+def bootstrap_sample(X, y):
+    n = len(X)
+    idx = np.random.choice(n, size=n, replace=True)
+    return X[idx], y[idx]`},
+    {id:"10_4",title:"Q4: Random Forest from scratch",type:"code",diff:"hard",xp:100,
+     q:"Implement random_forest_predict(X_train, y_train, X_test, n_trees=15).\nFor each tree: bootstrap sample → train sklearn DecisionTree (max_depth=4) → collect predictions.\nFinal prediction: majority vote.",
+     starter:`import numpy as np
+from sklearn.tree import DecisionTreeClassifier
+
+def bootstrap_sample(X, y):
+    idx = np.random.choice(len(X), size=len(X), replace=True)
+    return X[idx], y[idx]
+
+def random_forest_predict(X_train, y_train, X_test, n_trees=15):
+    predictions = []  # list of prediction arrays from each tree
+    np.random.seed(42)
+    for i in range(n_trees):
+        # 1. bootstrap sample
+        # 2. train a DecisionTreeClassifier(max_depth=4)
+        # 3. append tree.predict(X_test) to predictions
+        pass
+    # Majority vote across all trees
+    # Hint: np.array(predictions) has shape (n_trees, n_test)
+    # np.round(np.mean(..., axis=0)) or scipy.stats.mode
+    pass
+
+from sklearn.datasets import make_classification
+X,y=make_classification(n_samples=300,n_features=6,random_state=0)
+preds=random_forest_predict(X,y,X,n_trees=15)
+print(f"Train accuracy: {np.mean(preds==y)*100:.1f}%")`,
+     test:`import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.tree import DecisionTreeClassifier
+def bootstrap_sample(X,y):
+    idx=np.random.choice(len(X),size=len(X),replace=True); return X[idx],y[idx]
+X,y=make_classification(n_samples=300,n_features=6,random_state=0)
+preds=random_forest_predict(X,y,X,n_trees=15)
+acc=np.mean(preds==y)
+assert acc>0.85,f"RF train acc should be >85%, got {acc*100:.1f}%"
+assert preds.shape==(300,),f"Wrong shape: {preds.shape}"
+result = "PASS"`,
+     hints:["Loop: X_b,y_b=bootstrap_sample(X_train,y_train); tree=DecisionTreeClassifier(max_depth=4); tree.fit(X_b,y_b); predictions.append(tree.predict(X_test))","After loop: votes=np.array(predictions) — shape (n_trees, n_test)","Majority vote: final = np.round(np.mean(votes, axis=0)).astype(int)"],
+     sol:`import numpy as np
+from sklearn.tree import DecisionTreeClassifier
+
+def bootstrap_sample(X,y):
+    idx=np.random.choice(len(X),size=len(X),replace=True); return X[idx],y[idx]
+
+def random_forest_predict(X_train, y_train, X_test, n_trees=15):
+    preds=[]; np.random.seed(42)
+    for _ in range(n_trees):
+        Xb,yb=bootstrap_sample(X_train,y_train)
+        t=DecisionTreeClassifier(max_depth=4,random_state=np.random.randint(1000))
+        t.fit(Xb,yb); preds.append(t.predict(X_test))
+    votes=np.array(preds)
+    return np.round(np.mean(votes,axis=0)).astype(int)`}
+   ]}
+ ]}
+];
+
+// ════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════
+const SK='mlm_v6';
+let ST={done:[],xp:0};
+let curDay=null, curTaskIdx=0, editors={};
+let pyodide=null, pyReady=false;
+
+function loadState(){try{const r=localStorage.getItem(SK);if(r){const p=JSON.parse(r);ST.done=p.done||[];ST.xp=p.xp||0;}}catch(e){}}
+function saveState(){try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){}}
+function isDone(id){return ST.done.includes(id);}
+function markDone(id,xp){if(!isDone(id)){ST.done.push(id);ST.xp+=xp;saveState();}}
+function allDays(){return C.flatMap(p=>p.days);}
+function dayProg(day){const d=day.tasks.filter(t=>isDone(t.id)).length;return{done:d,total:day.tasks.length,pct:Math.round(d/day.tasks.length*100)};}
+function isUnlocked(dayNum){if(dayNum===1)return true;const prev=allDays().find(d=>d.day===dayNum-1);return prev?dayProg(prev).pct===100:true;}
+function getLvl(xp){const t=[500,1200,2200,3500,5000];const n=['Beginner','Apprentice','Practitioner','Engineer','Expert','Master'];let l=0;for(let i=0;i<t.length;i++){if(xp>=t[i])l=i+1;}return{lvl:l+1,name:n[l]};}
+function getStreak(){let s=0;for(const d of allDays()){if(dayProg(d).pct===100)s++;else break;}return s;}
+
+// ════════════════════════════════════════════════════════════
+//  PYODIDE INIT
+// ════════════════════════════════════════════════════════════
+async function initPyodide(){
+  try{
+    setStep(1,'cur');
+    pyodide=await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/'});
+    setStep(1,'done'); setStep(2,'cur');
+    await pyodide.loadPackage('numpy');
+    setStep(2,'done'); setStep(3,'cur');
+    await pyodide.loadPackage('scikit-learn');
+    setStep(3,'done'); setStep(4,'cur');
+    // setup stdout capture
+    await pyodide.runPythonAsync(`import sys,io\nsys.stdout=io.StringIO()\nsys.stderr=io.StringIO()`);
+    setStep(4,'done');
+    pyReady=true;
+    document.getElementById('pyOverlay').classList.add('hidden');
+    document.getElementById('pyStatus').className='py-status py-ready';
+    document.getElementById('pyStatus').textContent='✓ Python ready';
+  }catch(e){
+    document.getElementById('pyOverlay').innerHTML=`<div style="color:#ff9980;font-family:var(--mono);text-align:center"><div style="font-size:32px;margin-bottom:1rem">⚠</div><div>Failed to load Python runtime</div><div style="font-size:11px;margin-top:6px;color:var(--tx2)">${e.message}</div><div style="margin-top:1rem;font-size:11px;color:var(--tx2)">Check your internet connection and reload</div></div>`;
+  }
+}
+function setStep(n,state){const el=document.getElementById('ps'+n);if(el)el.className='py-step '+state;}
+
+async function runCode(studentCode, testCode){
+  if(!pyReady)return{ok:false,stdout:'',error:'Python runtime not ready yet. Please wait.'};
+  try{
+    // Reset stdout
+    await pyodide.runPythonAsync(`import sys,io\nsys.stdout=io.StringIO()\nsys.stderr=io.StringIO()`);
+    // Run student code + test code
+    const fullCode = studentCode + '\n' + testCode;
+    await pyodide.runPythonAsync(fullCode);
+    const stdout = pyodide.runPython("sys.stdout.getvalue()");
+    const resultVar = pyodide.runPython("result if 'result' in dir() else 'NO_RESULT'");
+    return{ok:resultVar==='PASS',stdout,error:null};
+  }catch(e){
+    let stdout='';
+    try{stdout=pyodide.runPython("sys.stdout.getvalue()");}catch(_){}
+    let msg=e.message||String(e);
+    // Clean up Pyodide error messages
+    if(msg.includes('AssertionError:')){const m=msg.match(/AssertionError: (.+)/);msg='AssertionError: '+(m?m[1]:'assertion failed');}
+    else if(msg.includes('NameError:')){const m=msg.match(/NameError: (.+)/);msg='NameError: '+(m?m[1]:'name not defined');}
+    else if(msg.includes('SyntaxError:')){msg='SyntaxError: check your code for typos';}
+    else{msg=msg.split('\n').filter(l=>!l.includes('File "<')).slice(-3).join('\n');}
+    return{ok:false,stdout,error:msg};
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  CONFETTI + TOAST
+// ════════════════════════════════════════════════════════════
+function confetti(big=false){
+  const cv=document.getElementById('cfc');const cx=cv.getContext('2d');
+  cv.width=innerWidth;cv.height=innerHeight;
+  const cols=['#00e5a0','#60a5fa','#f5a623','#a78bfa','#ff6b47','#7fffd4','#f472b6'];
+  const n=big?180:55;
+  const ps=Array.from({length:n},()=>({x:Math.random()*cv.width,y:-20,vx:(Math.random()-.5)*7,vy:Math.random()*4+2,r:Math.random()*6+2,col:cols[~~(Math.random()*cols.length)],rot:Math.random()*360,vr:(Math.random()-.5)*9,a:1}));
+  let f=0;
+  (function draw(){cx.clearRect(0,0,cv.width,cv.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.1;p.rot+=p.vr;p.a-=.007;if(p.a<=0)return;cx.save();cx.globalAlpha=p.a;cx.fillStyle=p.col;cx.translate(p.x,p.y);cx.rotate(p.rot*Math.PI/180);cx.fillRect(-p.r/2,-p.r/2,p.r,p.r*.5);cx.restore();});if(++f<220)requestAnimationFrame(draw);else cx.clearRect(0,0,cv.width,cv.height);})();
+}
+let _tt=null;
+function showToast(xp,lbl){
+  document.getElementById('t-xp').textContent='+'+xp+' XP';
+  document.getElementById('t-lbl').textContent=lbl;
+  const el=document.getElementById('toast');el.classList.add('show');
+  clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2400);
+}
+
+// ════════════════════════════════════════════════════════════
+//  MODAL
+// ════════════════════════════════════════════════════════════
+function showModal(icon,title,msg,xp){
+  document.getElementById('m-icon').textContent=icon;
+  document.getElementById('m-title').textContent=title;
+  document.getElementById('m-msg').textContent=msg;
+  document.getElementById('m-xp').textContent='+'+xp+' XP';
+  document.getElementById('modal').classList.add('show');
+  confetti(true);
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+
+// ════════════════════════════════════════════════════════════
+//  TOPBAR + SIDEBAR
+// ════════════════════════════════════════════════════════════
+function updateTopbar(crumb){
+  const lv=getLvl(ST.xp);
+  document.getElementById('xpPill').textContent=ST.xp+' XP · LVL '+lv.lvl;
+  document.getElementById('streakPill').textContent='🔥 '+getStreak();
+  document.getElementById('crumb').innerHTML=crumb?`<span>${crumb}</span>`:'← pick a day to start';
+}
+function buildSidebar(){
+  let h='';
+  C.forEach(ph=>{
+    h+=`<div class="ph-sep" style="color:${ph.col}">${ph.phase}</div>`;
+    ph.days.forEach(day=>{
+      const prog=dayProg(day);const ul=isUnlocked(day.day);
+      const isCur=curDay&&curDay.day===day.day;
+      const icCls=prog.pct===100?'done':(isCur?'cur':'todo');
+      const icTxt=prog.pct===100?'✓':(ul?'D'+day.day:'🔒');
+      h+=`<div class="day-item${isCur?' active':''}${!ul?' locked':''}" onclick="${ul?'openDay('+day.day+')':''}">
+        <div class="di-icon ${icCls}">${icTxt}</div>
+        <div class="di-text">
+          <div class="di-title">${day.title}</div>
+          <div class="di-sub">${prog.done}/${prog.total} tasks · ${day.xp} XP</div>
+        </div>
+        <div class="di-pct ${prog.pct===100?'lit':''}">${prog.pct}%</div>
+      </div>`;
+    });
+  });
+  document.getElementById('sidebar').innerHTML=h;
+}
+
+// ════════════════════════════════════════════════════════════
+//  LANDING
+// ════════════════════════════════════════════════════════════
+function showLanding(){
+  curDay=null;
+  const total=allDays().reduce((a,d)=>a+d.tasks.length,0);
+  const done=ST.done.length;
+  document.getElementById('main').innerHTML=`
+  <div class="landing">
+    <div class="landing-hero">
+      <h1>Machine Learning <span class="hl">Mastery</span></h1>
+      <p>This is a real coding platform — not a tracker. You write actual NumPy and sklearn code that runs in the browser. Tasks only complete when your code passes automated tests.</p>
+    </div>
+    <div class="feat-row">
+      <div class="feat-box"><span class="fi">📘</span><strong>Theory First</strong><span>Concept explanations with math, intuition, and common mistakes</span></div>
+      <div class="feat-box"><span class="fi">⌨️</span><strong>Real Python</strong><span>Pyodide runs your code against test cases — no faking progress</span></div>
+      <div class="feat-box"><span class="fi">💡</span><strong>3-Level Hints</strong><span>Stuck? Get progressive hints then the full solution as a last resort</span></div>
+    </div>
+    <p style="font-size:12px;color:var(--tx2);margin-bottom:1rem"><strong style="color:var(--g)">${done}/${total} tasks</strong> completed · <strong style="color:var(--am)">${ST.xp} XP</strong> · streak: 🔥${getStreak()}</p>
+    <div class="day-card-list">
+      ${allDays().map(day=>{
+        const prog=dayProg(day); const ul=isUnlocked(day.day);
+        return `<div class="day-launch-card${!ul?' lc-locked':''}" onclick="${ul?'openDay('+day.day+')':''}">
+          <div class="lc-icon">${prog.pct===100?'✅':ul?'📗':'🔒'}</div>
+          <div class="lc-body">
+            <strong>Day ${day.day} — ${day.title}</strong>
+            <span>${day.topic} · ${day.tasks.length} tasks · ${day.xp} XP${ul?' · '+prog.done+'/'+day.tasks.length+' done':' · Complete Day '+(day.day-1)+' to unlock'}</span>
+          </div>
+          <div class="lc-bar"><div class="lc-bar-fill" style="width:${prog.pct}%"></div></div>
+          <div class="lc-arr">${ul?'→':'🔒'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+  updateTopbar('');buildSidebar();
+}
+
+// ════════════════════════════════════════════════════════════
+//  OPEN DAY
+// ════════════════════════════════════════════════════════════
+function openDay(dayNum){
+  const day=allDays().find(d=>d.day===dayNum);
+  if(!day||!isUnlocked(dayNum))return;
+  curDay=day; curTaskIdx=0; editors={};
+  // find first undone task
+  const fi=day.tasks.findIndex(t=>!isDone(t.id));
+  if(fi>=0)curTaskIdx=fi;
+  buildSidebar();
+  renderLesson();
+  updateTopbar('Day '+dayNum+' — '+day.title);
+}
+
+// ════════════════════════════════════════════════════════════
+//  RENDER LESSON
+// ════════════════════════════════════════════════════════════
+function renderLesson(){
+  if(!curDay)return;
+  const day=curDay; const prog=dayProg(day);
+  if(prog.pct===100&&curTaskIdx>=day.tasks.length){showDayDone();return;}
+  const task=day.tasks[curTaskIdx];
+  document.getElementById('main').innerHTML=`
+  <div class="lesson-view">
+    <div class="l-left">
+      <div class="lh-day">DAY ${day.day} · ${day.topic.toUpperCase()}</div>
+      <div class="lh-title">${day.title}</div>
+      <div class="lh-tags">
+        <span class="ltag lt-t">Theory</span>
+        <span class="ltag lt-c">NumPy</span>
+        <span class="ltag lt-p">Practice</span>
+      </div>
+      <div class="prog-row">
+        <div class="prog-bar"><div class="prog-fill" style="width:${prog.pct}%"></div></div>
+        <div class="prog-txt">${prog.done}/${prog.total} tasks · ${day.xp} XP</div>
+      </div>
+      ${day.concept}
+    </div>
+    <div class="l-right" id="rightPanel">
+      <div class="task-tabs">${day.tasks.map((t,i)=>`
+        <div class="ttab ${isDone(t.id)?'done':''} ${i===curTaskIdx?'act':''}" onclick="gotoTask(${i})">
+          <div class="ck"></div>Q${i+1}
+        </div>`).join('')}
+      </div>
+      ${task.type==='mcq'?buildMCQ(task):buildCode(task)}
+    </div>
+  </div>`;
+  // Init CodeMirror after render
+  if(task.type==='code'){
+    requestAnimationFrame(()=>initEditor(task));
+  }
+}
+
+function gotoTask(i){
+  curTaskIdx=i;
+  const rp=document.getElementById('rightPanel');
+  renderLesson();
+  document.getElementById('rightPanel')?.scrollTo(0,0);
+}
+
+// ════════════════════════════════════════════════════════════
+//  MCQ
+// ════════════════════════════════════════════════════════════
+function buildMCQ(task){
+  const letters=['A','B','C','D'];
+  return `<div class="qpanel">
+    <div class="qp-head">
+      <div class="qp-num">${task.title}</div>
+      <div class="qp-q">${task.q}</div>
+      <div class="qp-diff diff-${task.diff}">${task.diff} · ${task.xp} XP</div>
+    </div>
+    <div class="mcq-list">${task.opts.map((o,i)=>`
+      <div class="mcq-opt" id="opt${i}" onclick="pickMCQ(${i},${task.ans},'${task.id}',${task.xp},'${esc(task.exp)}')">
+        <div class="opt-l">${letters[i]}</div>${o}
+      </div>`).join('')}
+    </div>
+    <div class="fb" id="fb"></div>
+    <div class="hints-wrap">
+      <button class="hint-btn" onclick="toggleEl('h0')">💡 Show Hint</button>
+      <div class="hint-box" id="h0">${task.hint}</div>
+    </div>
+  </div>`;
+}
+function esc(s){return s.replace(/'/g,"\\'").replace(/\n/g,' ');}
+function toggleEl(id){const e=document.getElementById(id);if(e)e.classList.toggle('show');}
+
+function pickMCQ(idx,correct,taskId,xp,explanation){
+  document.querySelectorAll('.mcq-opt').forEach(o=>o.onclick=null);
+  document.getElementById('opt'+idx)?.classList.add(idx===correct?'ok':'ng');
+  if(idx!==correct)document.getElementById('opt'+correct)?.classList.add('ok');
+  const fb=document.getElementById('fb');
+  if(fb){fb.className='fb show '+(idx===correct?'fb-ok':'fb-ng');fb.innerHTML=`<span class="fb-h">${idx===correct?'✓ Correct!':'✗ Not quite'}</span>${explanation}`;}
+  if(idx===correct){
+    if(!isDone(taskId)){markDone(taskId,xp);showToast(xp,'correct!');confetti(false);updateTopbar('Day '+curDay.day+' — '+curDay.title);}
+    setTimeout(()=>advance(),1800);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  CODE TASK
+// ════════════════════════════════════════════════════════════
+function buildCode(task){
+  return `<div class="qpanel" id="qpanel">
+    <div class="qp-head">
+      <div class="qp-num">${task.title}</div>
+      <div class="qp-q">${task.q}</div>
+      <div class="qp-diff diff-${task.diff}">${task.diff} · ${task.xp} XP</div>
+    </div>
+    <div class="editor-wrap" id="edWrap">
+      <div class="ed-bar">
+        <span class="ed-lang">python · numpy</span>
+        <div class="ed-btns">
+          <button class="ed-btn" onclick="resetCode('${task.id}')">↺ Reset</button>
+          <button class="run-btn" id="runBtn" onclick="runTask('${task.id}',${task.xp})">
+            <div class="spin"></div><span class="run-txt">▶ Run & Check</span>
+          </button>
+        </div>
+      </div>
+      <textarea id="codeArea">${task.starter}</textarea>
+      <div class="out-panel" id="outPanel"></div>
+    </div>
+    <div class="fb" id="fb"></div>
+    <div class="hints-wrap">
+      ${task.hints.map((h,i)=>`
+        <button class="hint-btn" onclick="toggleEl('h${i}')">💡 Hint ${i+1}${i>0?' (more specific)':''}</button>
+        <div class="hint-box" id="h${i}">${h}</div>`).join('')}
+      <button class="sol-btn" onclick="toggleEl('solArea')">👁 Show Solution (last resort)</button>
+      <div class="sol-area" id="solArea"><pre>${task.sol}</pre></div>
+    </div>
+    <div class="qactions">
+      <button class="qa-btn qa-submit" onclick="runTask('${task.id}',${task.xp})">▶ Run & Check</button>
+    </div>
+  </div>`;
+}
+
+function initEditor(task){
+  const ta=document.getElementById('codeArea');
+  if(!ta)return;
+  const cm=CodeMirror.fromTextArea(ta,{
+    mode:'python',theme:'dracula',lineNumbers:true,
+    indentUnit:4,tabSize:4,indentWithTabs:false,
+    lineWrapping:false,autofocus:true,
+    extraKeys:{"Tab":cm=>{cm.replaceSelection("    ");}}
+  });
+  editors[task.id]=cm;
+}
+
+function resetCode(taskId){
+  const task=curDay?.tasks.find(t=>t.id===taskId);if(!task)return;
+  const cm=editors[taskId];
+  if(cm)cm.setValue(task.starter);
+  const out=document.getElementById('outPanel');if(out){out.className='out-panel';out.innerHTML='';}
+  const fb=document.getElementById('fb');if(fb){fb.className='fb';}
+  const ew=document.getElementById('edWrap');if(ew){ew.className='editor-wrap';}
+}
+
+async function runTask(taskId,xp){
+  const task=curDay?.tasks.find(t=>t.id===taskId);if(!task)return;
+  const cm=editors[taskId];
+  const code=cm?cm.getValue():(document.getElementById('codeArea')?.value||'');
+  const btn=document.getElementById('runBtn');
+  const out=document.getElementById('outPanel');
+  const fb=document.getElementById('fb');
+  const ew=document.getElementById('edWrap');
+  if(btn){btn.classList.add('loading');btn.disabled=true;}
+  if(out){out.className='out-panel show';out.innerHTML='<span style="color:var(--am)">⏳ Running Python...</span>';}
+  const res=await runCode(code,task.test);
+  if(btn){btn.classList.remove('loading');btn.disabled=false;}
+  if(res.ok){
+    if(out){out.className='out-panel show';out.innerHTML=(res.stdout?`<span class="out-stdout">${esc2(res.stdout)}\n</span>`:'')+'<span class="out-pass">✓ All tests passed!</span>';}
+    if(fb){fb.className='fb show fb-ok';fb.innerHTML='<span class="fb-h">✓ Correct!</span>Great work! Your code passed all test cases.';}
+    if(ew)ew.className='editor-wrap pass-flash';
+    if(!isDone(taskId)){markDone(taskId,xp);showToast(xp,'tests passed!');confetti(true);updateTopbar('Day '+curDay.day+' — '+curDay.title);buildSidebar();}
+    setTimeout(()=>{if(ew)ew.className='editor-wrap';advance();},2200);
+  } else {
+    const errMsg=res.error||'Unknown error';
+    const stdoutPart=res.stdout?`<span class="out-stdout">${esc2(res.stdout)}\n</span>`:'';
+    if(out){out.className='out-panel show';out.innerHTML=stdoutPart+`<span class="out-fail">✗ ${esc2(errMsg)}</span>`;}
+    if(fb){fb.className='fb show fb-ng';fb.innerHTML=`<span class="fb-h">✗ Not passing yet</span>${esc2(errMsg)}`;}
+    if(ew){ew.className='editor-wrap fail-flash';setTimeout(()=>{if(ew)ew.className='editor-wrap';},400);}
+  }
+}
+function esc2(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ════════════════════════════════════════════════════════════
+//  ADVANCE + DAY DONE
+// ════════════════════════════════════════════════════════════
+function advance(){
+  const day=curDay; if(!day)return;
+  const prog=dayProg(day);
+  if(prog.pct===100){showDayDone();return;}
+  const next=day.tasks.findIndex((t,i)=>i>curTaskIdx&&!isDone(t.id));
+  if(next>=0){curTaskIdx=next;}
+  else{const any=day.tasks.findIndex(t=>!isDone(t.id));if(any>=0)curTaskIdx=any;}
+  renderLesson();
+  document.getElementById('rightPanel')?.scrollTo(0,0);
+}
+
+const msgs=[
+  {icon:'🧠',title:'Day Crushed!',msg:'Every task done. Your ML fundamentals are getting solid.'},
+  {icon:'⚡',title:'On Fire!',msg:'Consistency like this is what separates pros from dreamers.'},
+  {icon:'🚀',title:'Momentum!',msg:'You\'re building real engineering intuition now. Keep going.'},
+  {icon:'🔥',title:'Streak!',msg:'Day complete. The compound effect of daily practice adds up fast.'},
+  {icon:'💡',title:'Breakthrough!',msg:'This is exactly how ML engineers are made — one day at a time.'},
+];
+function showDayDone(){
+  const day=curDay;const totalXP=day.tasks.reduce((a,t)=>a+t.xp,0);
+  const m=msgs[Math.floor(Math.random()*msgs.length)];
+  const nextDay=allDays().find(d=>d.day===day.day+1);
+  confetti(true);buildSidebar();
+  updateTopbar('Day '+day.day+' Complete! 🎓');
+  document.getElementById('main').innerHTML=`
+  <div class="lesson-view">
+    <div class="l-left">${day.concept}</div>
+    <div class="l-right">
+      <div class="done-screen">
+        <span class="ds-icon">${m.icon}</span>
+        <div class="ds-title">${m.title}</div>
+        <div class="ds-sub">${m.msg}<br><br>Day ${day.day}: <strong>${day.title}</strong> — complete!</div>
+        <span class="ds-xp">+${totalXP} XP</span>
+        ${nextDay?`<button class="ds-btn" onclick="openDay(${nextDay.day})">Next: Day ${nextDay.day} →</button>`:'<button class="ds-btn" onclick="showLanding()">🏆 Course Complete!</button>'}
+        <button class="ds-btn ds-btn-g" onclick="openDay(${day.day})">Review Day ${day.day}</button>
+        <button class="ds-btn ds-btn-g" onclick="showLanding()">All Days</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════
+loadState();
+buildSidebar();
+showLanding();
+initPyodide();
+window.addEventListener('resize',()=>{const c=document.getElementById('cfc');if(c){c.width=innerWidth;c.height=innerHeight;}});
+</script>
+</body>
+</html>
